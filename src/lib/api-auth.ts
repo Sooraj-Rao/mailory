@@ -3,23 +3,22 @@ import { type NextRequest, NextResponse } from "next/server";
 import connectDB from "./mongodb";
 import ApiKey from "@/models/ApiKey";
 import EmailLog from "@/models/EmailLog";
+import User from "@/models/User";
 
 export async function validateApiKey(
   request: NextRequest
 ): Promise<{ isValid: boolean; apiKey?: any; userId?: string }> {
   const apiKey = request.headers.get("x-api-key");
-
   if (!apiKey) {
     return { isValid: false };
   }
-
   try {
     await connectDB();
+    console.log(User);
     const keyDoc = await ApiKey.findOne({
       keyValue: apiKey,
       isActive: true,
     }).populate("userId");
-
     if (!keyDoc) {
       return { isValid: false };
     }
@@ -32,7 +31,8 @@ export async function validateApiKey(
       apiKey: keyDoc,
       userId: keyDoc.userId._id.toString(),
     };
-  } catch {
+  } catch (error) {
+    console.log(error);
     return { isValid: false };
   }
 }
