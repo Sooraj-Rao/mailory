@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Zap, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -40,9 +41,7 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (data.success) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        router.push("/dashboard");
+        router.push("/dashboard/overview");
       } else {
         setError(data.error);
       }
@@ -54,60 +53,68 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <Card className="w-full max-w-md border-slate-700 bg-slate-800/50 backdrop-blur-sm">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center text-white">
+    <div className="min-h-screen w-screen flex items-center justify-center p-4 relative overflow-hidden app-gradient">
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+      </div>
+
+      <Link
+        href="/"
+        className="absolute top-6 left-6 flex items-center text-muted-foreground hover:text-foreground transition-colors z-10"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Home
+      </Link>
+
+      <Card className="w-full max-w-md card-gradient relative z-10">
+        <CardHeader className="space-y-1 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center">
+              <Zap className="w-7 h-7 text-white" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-foreground">
             Create Account
           </CardTitle>
-          <CardDescription className="text-center text-slate-300">
-            Sign up for your email service account
+          <CardDescription>
+            Join EmailFlow and start sending emails today
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <Alert className="border-red-500 bg-red-500/10">
-                <AlertDescription className="text-red-400">
-                  {error}
-                </AlertDescription>
+              <Alert className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-slate-200">
-                Full Name
-              </Label>
+              <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                 placeholder="Enter your full name"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-200">
-                Email
-              </Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                 placeholder="Enter your email"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-slate-200">
-                Password
-              </Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -115,25 +122,26 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                 placeholder="Enter your password (min 6 characters)"
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0 shadow-lg shadow-cyan-500/25"
               disabled={loading}
             >
               {loading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
 
-          <div className="mt-4 text-center">
-            <span className="text-slate-400">Already have an account? </span>
+          <div className="mt-6 text-center">
+            <span className="text-muted-foreground">
+              Already have an account?{" "}
+            </span>
             <Link
               href="/login"
-              className="text-purple-400 hover:text-purple-300"
+              className="text-cyan-400 hover:text-cyan-300 font-medium"
             >
               Sign in
             </Link>

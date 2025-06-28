@@ -18,8 +18,8 @@ export function startEmailWorker() {
     } catch (error) {
       console.error("Worker error:", error);
     }
-  }, 5000);
-  // 5sec
+  }, 10000);
+  // 10sec
 }
 
 export function stopEmailWorker() {

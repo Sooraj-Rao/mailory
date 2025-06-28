@@ -35,7 +35,6 @@ class BackgroundWorker {
       })
         .sort({ createdAt: 1 })
         .limit(3);
-
       if (pendingEmails.length === 0) {
         console.log("✅ No pending emails to process");
         this.isProcessing = false;

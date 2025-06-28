@@ -1,19 +1,19 @@
 import { type NextRequest, NextResponse } from "next/server"
 import connectDB from "@/lib/mongodb"
 import BatchEmail from "@/models/BatchEmail"
-import { verifyToken, getTokenFromRequest } from "@/lib/auth"
+import { getAuthToken, verifyAuthToken } from "@/lib/auth-cookies"
 import { randomBytes } from "crypto"
 import BackgroundWorker from "@/lib/background-worker"
+import { checkRateLimit, getRateLimitError } from "@/lib/api-auth" // Import checkRateLimit and getRateLimitError
 
-// For UI  batch email
 export async function POST(request: NextRequest) {
   try {
-    const token = getTokenFromRequest(request)
+    const token = await getAuthToken()
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const decoded = verifyToken(token)
+    const decoded = verifyAuthToken(token)
     if (!decoded) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
@@ -41,24 +41,9 @@ export async function POST(request: NextRequest) {
 
     await connectDB()
 
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-
-    const todayCount = await BatchEmail.countDocuments({
-      userId: decoded.userId,
-      createdAt: { $gte: today, $lt: tomorrow },
-    })
-
-    if (todayCount + recipients.length > 100) {
-      return NextResponse.json(
-        {
-          error: "Daily batch email limit exceeded",
-          message: `You can send ${100 - todayCount} more emails today. Total limit: 100 emails per day.`,
-        },
-        { status: 429 },
-      )
+    const { allowed, count } = await checkRateLimit(decoded.userId)
+    if (!allowed) {
+      return getRateLimitError(count)
     }
 
     const batchId = randomBytes(16).toString("hex")

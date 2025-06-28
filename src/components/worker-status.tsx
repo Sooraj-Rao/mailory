@@ -29,7 +29,6 @@ export default function WorkerStatus() {
     setLoading(true);
     try {
       const response = await fetch("/api/worker/control", { method: "POST" });
-      // await response.json();
       if (response.ok) {
         setStatus("running");
       }
@@ -44,7 +43,6 @@ export default function WorkerStatus() {
     setLoading(true);
     try {
       const response = await fetch("/api/worker/control", { method: "DELETE" });
-      // const data = await response.json();
       if (response.ok) {
         setStatus("stopped");
       }
@@ -62,16 +60,20 @@ export default function WorkerStatus() {
   }, []);
 
   return (
-    <Card className="border-slate-700 bg-slate-800/50">
+    <Card className="border-slate-700/50 bg-gradient-to-br dark:from-slate-800/50 dark:to-slate-900/50 from-slate-200/50 to-slate-300/50 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle className="text-white flex items-center justify-between">
+        <CardTitle className=" flex items-center  justify-between">
           <span className="flex items-center">
             <Zap className="w-5 h-5 mr-2" />
             Background Worker
           </span>
           <Badge
             variant={status === "running" ? "default" : "secondary"}
-            className={status === "running" ? "bg-green-600" : "bg-gray-600"}
+            className={
+              status === "running"
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-gray-600 hover:bg-gray-700"
+            }
           >
             {status === "running"
               ? "Running"
@@ -82,13 +84,13 @@ export default function WorkerStatus() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-slate-300">
+        <div className="flex items-center justify-between text-muted-foreground">
+          <div className="text-sm ">
             {status === "running" ? (
               <span>✅ Automatically processing emails every 10 seconds</span>
             ) : status === "stopped" ? (
               <span>
-                ⏸️ Worker is stopped - emails won&apos;t process automatically (APIs)
+                ⏸️ Worker is stopped - emails won&apos;t process automatically
               </span>
             ) : (
               <span>❓ Worker status unknown</span>
@@ -99,7 +101,7 @@ export default function WorkerStatus() {
               onClick={fetchStatus}
               size="sm"
               variant="outline"
-              className="border-slate-600 text-slate-300 bg-transparent"
+              className="border-slate-600 text-muted-foreground bg-transparent "
             >
               <RefreshCw className="w-4 h-4" />
             </Button>

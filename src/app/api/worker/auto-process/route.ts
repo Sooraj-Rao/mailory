@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import BatchEmail from "@/models/BatchEmail";
 import { sendEmail } from "@/lib/email-service";
+import { getAuthToken, verifyAuthToken } from "@/lib/auth-cookies";
+import mongoose from "mongoose";
 
 export async function POST() {
   try {
@@ -131,9 +133,24 @@ export async function POST() {
 
 export async function GET() {
   try {
+    const token = await getAuthToken();
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const decoded = verifyAuthToken(token);
+    if (!decoded) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+
     await connectDB();
 
+    const userId = new mongoose.Types.ObjectId(decoded.userId);
+
     const stats = await BatchEmail.aggregate([
+      {
+        $match: { userId },
+      },
       {
         $group: {
           _id: "$status",

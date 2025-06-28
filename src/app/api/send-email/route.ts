@@ -34,6 +34,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (typeof to !== "string") {
+      return NextResponse.json(
+        {
+          error: "Recipient email must be a string.",
+        },
+        { status: 400 }
+      );
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const recipients = Array.isArray(to) ? to : [to];
 
@@ -72,8 +81,8 @@ export async function POST(request: NextRequest) {
         to: recipients,
         dailyUsage: {
           sent: count + 1,
-          limit: 50,
-          remaining: 49 - count,
+          limit: 100,
+          remaining: 99 - count,
         },
       });
     } catch (emailError: any) {

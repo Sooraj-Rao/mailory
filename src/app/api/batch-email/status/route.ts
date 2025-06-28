@@ -1,21 +1,20 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import BatchEmail from "@/models/BatchEmail";
-import { verifyToken, getTokenFromRequest } from "@/lib/auth";
+import { getAuthToken, verifyAuthToken } from "@/lib/auth-cookies";
 import mongoose from "mongoose";
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const token = getTokenFromRequest(request);
+    const token = await getAuthToken();
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = verifyToken(token);
+    const decoded = verifyAuthToken(token);
     if (!decoded) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
-
     const { searchParams } = new URL(request.url);
     const batchId = searchParams.get("batchId");
 
@@ -114,7 +113,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Internal server error",
-        details: 'Internal server error',
+        details: "Internal server error",
       },
       { status: 500 }
     );

@@ -1,23 +1,43 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Features from "@/components/home/features";
+import Footer from "@/components/home/footer";
+import Header from "@/components/home/header";
+import Hero from "@/components/home/hero";
+import Pricing from "@/components/home/pricing";
+import Cookies from "js-cookie";
 
 export default function HomePage() {
-  const router = useRouter()
+  const router = useRouter();
+  const token = Cookies.get("auth-token");
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
+    console.log(token);
     if (token) {
-      router.push("/dashboard")
-    } else {
-      router.push("/login")
+      router.push("/dashboard/overview");
+      return;
     }
-  }, [router])
+  }, [router]);
+
+  if (!router) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="text-white">Loading...</div>
-    </div>
-  )
+    <>
+      <div className="min-h-screen ">
+        <Header />
+        <Hero />
+        <Features />
+        <Pricing />
+        <Footer />
+      </div>
+    </>
+  );
 }
