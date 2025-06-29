@@ -5,49 +5,60 @@ import {
   validateApiKey,
   checkRateLimit,
   getRateLimitError,
-} from "@/lib/api-auth"; 
+} from "@/lib/api-auth";
 import { randomBytes } from "crypto";
 import BackgroundWorker from "@/lib/background-worker";
+import { setCorsHeaders, handleCorsOptions } from "@/lib/cors";
 
 export async function POST(request: NextRequest) {
   try {
     const { isValid, apiKey, userId } = await validateApiKey(request);
     if (!isValid || !apiKey || !userId) {
-      return NextResponse.json(
-        { error: "Invalid or missing API key" },
-        { status: 401 }
+      return setCorsHeaders(
+        NextResponse.json(
+          { error: "Invalid or missing API key" },
+          { status: 401 }
+        )
       );
     }
 
     const { recipients, subject, html, text, from } = await request.json();
 
     if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
-      return NextResponse.json(
-        { error: "Recipients array is required" },
-        { status: 400 }
+      return setCorsHeaders(
+        NextResponse.json(
+          { error: "Recipients array is required" },
+          { status: 400 }
+        )
       );
     }
 
     if (recipients.length > 100) {
-      return NextResponse.json(
-        { error: "Maximum 100 recipients allowed per batch" },
-        { status: 400 }
+      return setCorsHeaders(
+        NextResponse.json(
+          { error: "Maximum 100 recipients allowed per batch" },
+          { status: 400 }
+        )
       );
     }
 
     if (!subject || !html) {
-      return NextResponse.json(
-        { error: "Subject and HTML content are required" },
-        { status: 400 }
+      return setCorsHeaders(
+        NextResponse.json(
+          { error: "Subject and HTML content are required" },
+          { status: 400 }
+        )
       );
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     for (const email of recipients) {
       if (!emailRegex.test(email)) {
-        return NextResponse.json(
-          { error: `Invalid email format: ${email}` },
-          { status: 400 }
+        return setCorsHeaders(
+          NextResponse.json(
+            { error: `Invalid email format: ${email}` },
+            { status: 400 }
+          )
         );
       }
     }
@@ -56,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     const { allowed, count } = await checkRateLimit(userId);
     if (!allowed) {
-      return getRateLimitError(count);
+      return setCorsHeaders(getRateLimitError(count));
     }
 
     const batchId = randomBytes(16).toString("hex");
@@ -89,18 +100,23 @@ export async function POST(request: NextRequest) {
       `📧 API Batch created: ${recipients.length} emails queued for ${userId}`
     );
 
-    return NextResponse.json({
-      success: true,
-      batchId,
-      totalEmails: recipients.length,
-      message: "Batch emails queued for processing",
-      processingStarted: true,
-    });
+    return setCorsHeaders(
+      NextResponse.json({
+        success: true,
+        batchId,
+        totalEmails: recipients.length,
+        message: "Batch emails queued for processing",
+        processingStarted: true,
+      })
+    );
   } catch (error) {
     console.error("API batch email error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+    return setCorsHeaders(
+      NextResponse.json({ error: "Internal server error" }, { status: 500 })
     );
   }
+}
+
+export function OPTIONS() {
+  return handleCorsOptions();
 }
