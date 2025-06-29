@@ -4,7 +4,7 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CustomSidebar } from "@/components/home/sidebar";
-import Cookies from "js-cookie";
+import { useUser } from "@/hooks/user/auth-user";
 
 export default function DashboardLayout({
   children,
@@ -13,14 +13,14 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const token = Cookies.get("auth-token");
+  const { userData } = useUser();
 
   useEffect(() => {
-    if (!token) {
+    if (!userData) {
       router.push("/login");
       return;
     }
-  }, [router]);
+  }, [userData]);
 
   if (!router) {
     return (

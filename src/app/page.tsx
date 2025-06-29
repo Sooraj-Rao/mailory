@@ -7,19 +7,18 @@ import Footer from "@/components/home/footer";
 import Header from "@/components/home/header";
 import Hero from "@/components/home/hero";
 import Pricing from "@/components/home/pricing";
-import Cookies from "js-cookie";
+import { useUser } from "@/hooks/user/auth-user";
 
 export default function HomePage() {
   const router = useRouter();
-  const token = Cookies.get("auth-token");
+  const { userData } = useUser();
 
   useEffect(() => {
-    console.log(token);
-    if (token) {
+    if (userData) {
       router.push("/dashboard/overview");
       return;
     }
-  }, [router]);
+  }, [userData]);
 
   if (!router) {
     return (

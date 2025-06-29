@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Zap, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useUser } from "@/hooks/user/auth-user";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -25,6 +26,14 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const { userData, userDataLoading } = useUser();
+
+  useEffect(() => {
+    if (userData) {
+      router.push("/dashboard/overview");
+    }
+  }, [userData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +60,14 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  if (userDataLoading) {
+    return (
+      <div className=" text-center mt-40">
+        <h1>loading...</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-screen flex items-center justify-center p-4 relative overflow-hidden app-gradient">

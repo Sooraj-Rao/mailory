@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -30,6 +29,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "../theme/theme-toggle";
 import Link from "next/link";
+import { useZustandStore } from "@/zustand/store";
 
 const menuItems = [
   {
@@ -96,25 +96,9 @@ interface CustomSidebarProps {
 }
 
 export function CustomSidebar({ isOpen, onToggle }: CustomSidebarProps) {
-  const [userData, setUserData] = useState<any | null>(null);
+  const { userData } = useZustandStore();
   const router = useRouter();
   const pathname = usePathname();
-
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch("/api/auth/me");
-      const data = await response.json();
-      if (response.ok) {
-        setUserData(data.user);
-      }
-    } catch {
-      console.error("Failed to fetch user data");
-    }
-  };
 
   const logout = async () => {
     try {

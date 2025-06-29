@@ -24,12 +24,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { SidebarTrigger } from "@/components/home/sidebar";
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
+import { useUser } from "@/hooks/user/auth-user";
 
 interface EmailStats {
   today: {
@@ -52,30 +47,15 @@ interface EmailStats {
 }
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<User | null>(null);
+  const { userData, userDataLoading } = useUser();
   const [emailStats, setEmailStats] = useState<EmailStats | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    fetchUserData();
     fetchEmailStats();
   }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch("/api/auth/me");
-      const data = await response.json();
-      if (response.ok) {
-        setUser(data.user);
-      } else {
-        window.location.href = "/login";
-      }
-    } catch {
-      window.location.href = "/login";
-    }
-  };
 
   const fetchEmailStats = async () => {
     try {
@@ -98,7 +78,7 @@ export default function DashboardPage() {
     setTimeout(() => setSuccess(""), 2000);
   };
 
-  if (!user) {
+  if (!userDataLoading && !userData) {
     return (
       <div className="min-h-screen flex items-center justify-center app-gradient">
         <div className="text-foreground">Loading...</div>
@@ -108,14 +88,15 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen app-gradient overflow-y-auto">
-      {/* Header */}
       <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center px-6">
           <SidebarTrigger />
           <div className="flex items-center justify-between w-full ml-4">
             <div>
               <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back, {user.name}</p>
+              <p className="text-muted-foreground">
+                Welcome, {userData?.name}
+              </p>
             </div>
             <Button
               onClick={refreshData}
