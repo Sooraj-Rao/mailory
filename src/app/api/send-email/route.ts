@@ -30,7 +30,12 @@ export async function POST(request: NextRequest) {
           error: "Missing required fields",
           required: ["to", "subject", "text or html"],
         },
-        { status: 400 }
+        {
+          status: 400,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
       );
     }
 
@@ -39,7 +44,12 @@ export async function POST(request: NextRequest) {
         {
           error: "Recipient email must be a string.",
         },
-        { status: 400 }
+        {
+          status: 400,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
       );
     }
 
@@ -52,7 +62,12 @@ export async function POST(request: NextRequest) {
           {
             error: `Invalid email format: ${email}`,
           },
-          { status: 400 }
+          {
+            status: 400,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+            },
+          }
         );
       }
     }
@@ -96,14 +111,35 @@ export async function POST(request: NextRequest) {
           error: "Failed to send email",
           details: emailError.message,
         },
-        { status: 500 }
+        {
+          status: 500,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
       );
     }
   } catch (error) {
     console.error("Send email API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
     );
   }
+}
+
+export function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    },
+  });
 }
