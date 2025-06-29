@@ -24,7 +24,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { SidebarTrigger } from "@/components/home/sidebar";
-import { useUser } from "@/hooks/user/auth-user";
+import { useZustandStore } from "@/zustand/store";
 
 interface EmailStats {
   today: {
@@ -47,7 +47,7 @@ interface EmailStats {
 }
 
 export default function DashboardPage() {
-  const { userData, userDataLoading } = useUser();
+  const { userData } = useZustandStore();
   const [emailStats, setEmailStats] = useState<EmailStats | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -78,7 +78,7 @@ export default function DashboardPage() {
     setTimeout(() => setSuccess(""), 2000);
   };
 
-  if (!userDataLoading && !userData) {
+  if (!userData) {
     return (
       <div className="min-h-screen flex items-center justify-center app-gradient">
         <div className="text-foreground">Loading...</div>
@@ -93,8 +93,8 @@ export default function DashboardPage() {
           <SidebarTrigger />
           <div className="flex items-center justify-between w-full ml-4">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-muted-foreground text-sm">
                 Welcome, {userData?.name}
               </p>
             </div>
@@ -246,7 +246,7 @@ export default function DashboardPage() {
                 Use your API key to send emails programmatically.
               </p>
               <Link href="/dashboard/send-email">
-                <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white group-hover:shadow-lg group-hover:shadow-cyan-500/25 transition-all">
+                <Button variant="grad1" className="w-full l">
                   Get Started
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -279,7 +279,7 @@ export default function DashboardPage() {
                 with advanced tracking and analytics.
               </p>
               <Link href="/dashboard/batch-email">
-                <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white group-hover:shadow-lg group-hover:shadow-purple-500/25 transition-all">
+                <Button variant="grad2" className="w-full">
                   Create Campaign
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

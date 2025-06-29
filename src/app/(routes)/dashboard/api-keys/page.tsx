@@ -174,17 +174,16 @@ export default function ApiKeysPage() {
   };
 
   return (
-    <div className="min-h-screen app-gradient">
+    <div className="min-h-screen app-gradient overflow-y-auto">
       <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center px-6">
           <SidebarTrigger />
           <div className="flex items-center justify-between w-full ml-4">
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
-                <Key className="w-6 h-6 text-cyan-400" />
+              <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
                 API Keys
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Manage your API keys and view usage statistics
               </p>
             </div>
@@ -316,9 +315,10 @@ export default function ApiKeysPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={createApiKey} className="flex gap-4">
-              <div className="flex-1">
+              <div>
                 <Label htmlFor="keyName">Key Name</Label>
                 <Input
+                className=" w-full"
                   id="keyName"
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
@@ -326,7 +326,7 @@ export default function ApiKeysPage() {
                   required
                 />
               </div>
-              <Button type="submit" disabled={loading} className="mt-6">
+              <Button variant='grad1' type="submit" disabled={loading} className="mt-6">
                 <Plus className="w-4 h-4 mr-2" />
                 {loading ? "Creating..." : "Create Key"}
               </Button>
@@ -366,9 +366,8 @@ export default function ApiKeysPage() {
                     </Badge>
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant='destructive'
                       onClick={() => deleteApiKey(key.id, key.keyName)}
-                      className="text-destructive border-destructive/50 hover:bg-destructive/10 dark:text-destructive dark:border-destructive/80 dark:hover:bg-destructive/95"
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>

@@ -50,7 +50,7 @@ export async function GET() {
         sent: sentToday,
         failed: failedToday,
         total: todayCount,
-        remaining: Math.max(0, 50 - todayCount),
+        remaining: Math.max(0, 100 - todayCount),
       },
       total: {
         sent: totalSent,

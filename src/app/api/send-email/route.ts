@@ -25,12 +25,12 @@ export async function POST(request: NextRequest) {
 
     const { to, subject, text, html, from } = await request.json();
 
-    if (!to || !subject || (!text && !html)) {
+    if (!from || !to || !subject || (!text && !html)) {
       return setCorsHeaders(
         NextResponse.json(
           {
             error: "Missing required fields",
-            required: ["to", "subject", "text or html"],
+            required: ["to", "subject", "text or html", "from"],
           },
           { status: 400 }
         )

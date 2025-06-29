@@ -13,10 +13,10 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const { userData } = useUser();
+  const { userData, userDataLoading } = useUser();
 
   useEffect(() => {
-    if (!userData) {
+    if (!userData && !userDataLoading) {
       router.push("/login");
       return;
     }

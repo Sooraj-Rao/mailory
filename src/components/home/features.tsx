@@ -18,7 +18,7 @@ const features = [
     title: "Transactional API",
     description:
       "Send password resets, confirmations, and notifications with our reliable API.",
-    stats: "50 emails/day free",
+    stats: "100 emails/day free",
     gradient: "from-cyan-500 to-blue-500",
   },
   {

@@ -33,7 +33,6 @@ import {
   Eye,
   Mail,
   BarChart3,
-  Users,
   Activity,
   Plus,
   Upload,
@@ -98,10 +97,7 @@ export default function BatchEmailPage() {
 
   const fetchBatches = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/batch-email/status", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch("/api/batch-email/status");
       const data = await response.json();
       if (response.ok) {
         setBatches(data.batches || []);
@@ -315,17 +311,16 @@ export default function BatchEmailPage() {
   };
 
   return (
-    <>
-      <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="app-gradient">
+      <div className="border-b border-border dark:bg-background/95 bg-background/10 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center px-6">
           <SidebarTrigger />
           <div className="flex items-center justify-between w-full ml-4">
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
-                <Users className="w-6 h-6 text-purple-400" />
+              <h1 className="text-xl font-bold  flex items-center gap-2">
                 Batch Email
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Campaign and bulk email service
               </p>
             </div>
@@ -864,6 +859,6 @@ Or upload a CSV/Excel file with email addresses`}
           )}
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

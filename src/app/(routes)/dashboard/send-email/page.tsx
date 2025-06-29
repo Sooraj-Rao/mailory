@@ -112,11 +112,10 @@ export default function SendEmailPage() {
           <SidebarTrigger />
           <div className="flex items-center justify-between w-full ml-4">
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
-                <Send className="w-6 h-6 text-cyan-400" />
+              <h1 className="text-xl font-bold  flex items-center gap-2">
                 Send Email API
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Transactional email service
               </p>
             </div>
@@ -181,7 +180,7 @@ export default function SendEmailPage() {
                       {emailStats.today.remaining}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      out of 50 daily limit
+                      out of 100 daily limit
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
