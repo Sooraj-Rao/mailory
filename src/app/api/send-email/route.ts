@@ -90,16 +90,24 @@ export async function POST(request: NextRequest) {
       emailLog.messageId = result.MessageId;
       await emailLog.save();
 
-      return NextResponse.json({
-        success: true,
-        messageId: result.MessageId,
-        to: recipients,
-        dailyUsage: {
-          sent: count + 1,
-          limit: 100,
-          remaining: 99 - count,
+      return NextResponse.json(
+        {
+          success: true,
+          messageId: result.MessageId,
+          to: recipients,
+          dailyUsage: {
+            sent: count + 1,
+            limit: 100,
+            remaining: 99 - count,
+          },
         },
-      });
+        {
+          status: 200,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
     } catch (emailError: any) {
       emailLog.status = "failed";
       emailLog.error = emailError.message;
