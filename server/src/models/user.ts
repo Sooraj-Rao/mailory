@@ -1,18 +1,18 @@
-import mongoose, { type Document, Schema, type Types } from "mongoose";
+import mongoose, { type Document, Schema, type Types } from "mongoose"
 
 export interface IUser extends Document {
-  _id: Types.ObjectId;
-  email: string;
-  name: string;
+  _id: Types.ObjectId
+  email: string
+  name: string
   subscription: {
-    plan: "free" | "starter" | "pro" | "premium";
-    status: "active" | "inactive" | "cancelled";
-    emailLimit: number;
-    emailsSent: number;
-    resetDate: Date;
-  };
-  createdAt: Date;
-  updatedAt: Date;
+    plan: "free" | "starter" | "pro" | "premium"
+    status: "active" | "inactive" | "cancelled"
+    emailsUsed: number
+    emailsLimit: number
+    resetDate: Date
+  }
+  createdAt: Date
+  updatedAt: Date
 }
 
 const UserSchema = new Schema<IUser>(
@@ -30,14 +30,14 @@ const UserSchema = new Schema<IUser>(
         enum: ["active", "inactive", "cancelled"],
         default: "active",
       },
-      emailLimit: { type: Number, default: 100 },
-      emailsSent: { type: Number, default: 0 },
-      resetDate: { type: Date, default: Date.now },
+      emailsUsed: { type: Number, default: 0 },
+      emailsLimit: { type: Number, default: 100 },
+      resetDate: { type: Date, default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
     },
   },
   {
     timestamps: true,
-  }
-);
+  },
+)
 
-export default mongoose.model<IUser>("User", UserSchema);
+export default mongoose.model<IUser>("User", UserSchema)

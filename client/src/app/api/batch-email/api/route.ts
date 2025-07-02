@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       subject,
       html,
       text,
-      from: from || "EmailService",
+      from: from || "SendMailr",
       batchId,
       status: "pending",
     }));

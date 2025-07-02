@@ -1,25 +1,29 @@
-import winston from "winston"
-import DailyRotateFile from "winston-daily-rotate-file"
+import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 const logFormat = winston.format.combine(
   winston.format.timestamp(),
   winston.format.errors({ stack: true }),
-  winston.format.json(),
-)
+  winston.format.json()
+);
 
 const consoleFormat = winston.format.combine(
-  winston.format.timestamp(),
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
   winston.format.colorize(),
   winston.format.printf(({ timestamp, level, message, service, ...meta }) => {
-    let logMessage = `${timestamp} [${level}]: ${message}`
+    let logMessage = `${timestamp} [${level}]: ${message}`;
 
-    if (Object.keys(meta).length > 0) {
-      logMessage += ` ${JSON.stringify(meta, null, 2)}`
+    if (service) {
+      logMessage += ` {service: "${service}"}`;
     }
 
-    return logMessage
-  }),
-)
+    if (Object.keys(meta).length > 0) {
+      logMessage += ` ${JSON.stringify(meta, null, 2)}`;
+    }
+
+    return logMessage;
+  })
+);
 
 export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || "info",
@@ -48,4 +52,14 @@ export const logger = winston.createLogger({
       maxFiles: "14d",
     }),
   ],
-})
+});
+
+// Handle uncaught exceptions
+logger.exceptions.handle(
+  new winston.transports.File({ filename: "logs/exceptions.log" })
+);
+
+// Handle unhandled promise rejections
+logger.rejections.handle(
+  new winston.transports.File({ filename: "logs/rejections.log" })
+);

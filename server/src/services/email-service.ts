@@ -1,6 +1,6 @@
 import { getSESClient } from "../config/aws";
 import { logger } from "../utils/logger";
-import type AWS from "aws-sdk"; // Declare the AWS variable
+import type AWS from "aws-sdk";
 
 export interface EmailParams {
   to: string | string[];
@@ -50,7 +50,7 @@ export class EmailService {
     try {
       const result = await this.sesClient.sendEmail(sesParams).promise();
 
-      logger.info("Email sent successfully", {
+      logger.info("✅ Email sent successfully", {
         service: "email-service",
         messageId: result.MessageId,
         to: recipients,
@@ -59,7 +59,7 @@ export class EmailService {
 
       return { MessageId: result.MessageId || "unknown" };
     } catch (error: any) {
-      logger.error("Failed to send email", {
+      logger.error("❌ Failed to send email", {
         service: "email-service",
         error: error.message,
         to: recipients,
@@ -69,14 +69,22 @@ export class EmailService {
     }
   }
 
-  async getSendQuota() {
+  async getSendQuota(): Promise<{
+    Max24HourSend: number;
+    MaxSendRate: number;
+    SentLast24Hours: number;
+  }> {
     if (!this.sesClient) {
       return { Max24HourSend: 0, MaxSendRate: 0, SentLast24Hours: 0 };
     }
 
     try {
       const result = await this.sesClient.getSendQuota().promise();
-      return result;
+      return {
+        Max24HourSend: result.Max24HourSend ?? 0,
+        MaxSendRate: result.MaxSendRate ?? 0,
+        SentLast24Hours: result.SentLast24Hours ?? 0,
+      };
     } catch (error: any) {
       logger.error("Failed to get SES quota", {
         service: "email-service",

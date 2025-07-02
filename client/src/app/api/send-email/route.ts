@@ -9,7 +9,6 @@ import {
 } from "@/lib/api-auth";
 import connectDB from "@/lib/mongodb";
 import EmailLog from "@/models/EmailLog";
-import { sendEmail } from "@/lib/email-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,9 +17,13 @@ export async function POST(request: NextRequest) {
       return setCorsHeaders(getApiKeyError());
     }
 
-    const { allowed, count } = await checkRateLimit(userId);
+    const { allowed, dailyCount, monthlyCount, limits } = await checkRateLimit(
+      userId
+    );
     if (!allowed) {
-      return setCorsHeaders(getRateLimitError(count));
+      return setCorsHeaders(
+        getRateLimitError(dailyCount, monthlyCount, limits)
+      );
     }
 
     const { to, subject, text, html, from } = await request.json();
@@ -72,15 +75,31 @@ export async function POST(request: NextRequest) {
     });
 
     try {
-      const result = await sendEmail({ to, subject, text, html, from });
+      // Send email via Express server
+      const workerUrl = process.env.EMAIL_WORKER_URL || "http://localhost:4000";
+      const response = await fetch(`${workerUrl}/api/v1/email/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ to, subject, text, html, from }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.details || result.error || "Failed to send email"
+        );
+      }
 
       emailLog.status = "sent";
-      emailLog.messageId = result.MessageId;
+      emailLog.messageId = result.messageId;
       await emailLog.save();
 
       return setCorsHeaders(
         NextResponse.json(
-          { success: true, messageId: result.MessageId },
+          { success: true, messageId: result.messageId },
           { status: 200 }
         )
       );

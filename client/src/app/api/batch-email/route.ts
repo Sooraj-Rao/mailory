@@ -52,9 +52,11 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    const { allowed, dailyCount,monthlyCount,limits } = await checkRateLimit(decoded.userId);
+    const { allowed, dailyCount, monthlyCount, limits } = await checkRateLimit(
+      decoded.userId
+    );
     if (!allowed) {
-      return getRateLimitError(dailyCount,monthlyCount,limits);
+      return getRateLimitError(dailyCount, monthlyCount, limits);
     }
 
     const batchId = randomBytes(16).toString("hex");

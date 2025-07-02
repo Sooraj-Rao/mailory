@@ -1,78 +1,73 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server";
 
-const WORKER_URL = process.env.EMAIL_WORKER_URL || "http://localhost:4000"
-
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const response = await fetch(`${WORKER_URL}/api/v1/worker/start`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    })
+    const { action } = await request.json();
 
-    const data = await response.json()
-
-    if (!response.ok) {
-      return NextResponse.json(data, { status: response.status })
+    if (!["start", "stop", "status"].includes(action)) {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error("Worker control error:", error)
-    return NextResponse.json(
-      {
-        error: "Failed to communicate with worker server",
-        details: "Email worker server may be offline",
-      },
-      { status: 503 },
-    )
-  }
-}
+    const workerUrl = process.env.EMAIL_WORKER_URL || "http://localhost:4000";
 
-export async function DELETE() {
-  try {
-    const response = await fetch(`${WORKER_URL}/api/v1/worker/stop`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    })
+    let endpoint = "";
+    let method = "GET";
 
-    const data = await response.json()
-
-    if (!response.ok) {
-      return NextResponse.json(data, { status: response.status })
+    switch (action) {
+      case "start":
+        endpoint = "/api/v1/worker/start";
+        method = "POST";
+        break;
+      case "stop":
+        endpoint = "/api/v1/worker/stop";
+        method = "POST";
+        break;
+      case "status":
+        endpoint = "/api/v1/worker/status";
+        method = "GET";
+        break;
     }
 
-    return NextResponse.json(data)
+    const response = await fetch(`${workerUrl}${endpoint}`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: result.error || "Worker operation failed" },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Worker control error:", error)
+    console.error("Worker control error:", error);
     return NextResponse.json(
-      {
-        error: "Failed to communicate with worker server",
-        details: "Email worker server may be offline",
-      },
-      { status: 503 },
-    )
+      { error: "Failed to communicate with worker server" },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET() {
   try {
-    const response = await fetch(`${WORKER_URL}/api/v1/worker/status`)
-    const data = await response.json()
+    const workerUrl = process.env.EMAIL_WORKER_URL || "http://localhost:4000";
+    const response = await fetch(`${workerUrl}/api/v1/worker/status`);
 
     if (!response.ok) {
-      return NextResponse.json(data, { status: response.status })
+      throw new Error("Failed to get worker status");
     }
 
-    return NextResponse.json(data)
+    const result = await response.json();
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Worker status error:", error)
+    console.error("Worker status error:", error);
     return NextResponse.json(
-      {
-        error: "Failed to communicate with worker server",
-        details: "Email worker server may be offline",
-        status: "unknown",
-      },
-      { status: 503 },
-    )
+      { error: "Failed to get worker status" },
+      { status: 500 }
+    );
   }
 }

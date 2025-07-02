@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -17,7 +18,6 @@ import {
   CheckCircle,
   Calendar,
   TrendingUp,
-  Zap,
 } from "lucide-react";
 import { SidebarTrigger } from "@/components/home/sidebar";
 import { useZustandStore } from "@/zustand/store";
@@ -47,7 +47,7 @@ export default function BillingPage() {
   const [subscription, setSubscription] = useState<UserSubscription | null>(
     null
   );
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -78,11 +78,10 @@ export default function BillingPage() {
   const handleUpgrade = async (planId: string) => {
     if (!userData || planId === "free") return;
 
-    setLoading(true);
+    setLoading(planId);
     setError("");
 
     try {
-      // Create subscription
       const response = await fetch("/api/payments/create-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -95,7 +94,6 @@ export default function BillingPage() {
         throw new Error(data.error);
       }
 
-      // Initialize Razorpay
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         subscription_id: data.subscriptionId,
@@ -103,7 +101,6 @@ export default function BillingPage() {
         description: `${SUBSCRIPTION_PLANS[planId].name} Plan Subscription`,
         handler: async (response: any) => {
           try {
-            // Verify payment
             const verifyResponse = await fetch("/api/payments/verify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -123,7 +120,7 @@ export default function BillingPage() {
             } else {
               setError(verifyData.error);
             }
-          } catch (err) {
+          } catch {
             setError("Payment verification failed");
           }
         },
@@ -141,7 +138,7 @@ export default function BillingPage() {
     } catch (err: any) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setLoading("");
     }
   };
 
@@ -312,7 +309,7 @@ export default function BillingPage() {
                   </div>
 
                   {subscription.plan === plan.id ? (
-                    <Button disabled className="w-full">
+                    <Button variant="outline" disabled className="w-full">
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Current Plan
                     </Button>
@@ -323,11 +320,12 @@ export default function BillingPage() {
                   ) : (
                     <Button
                       onClick={() => handleUpgrade(plan.id)}
-                      disabled={loading}
-                      className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                      disabled={loading !== ""}
+                      className="w-full"
+                      variant={loading === plan.id ? "grad2" : "grad1"}
                     >
                       <Crown className="w-4 h-4 mr-2" />
-                      {loading ? "Processing..." : "Upgrade"}
+                      {loading === plan.id ? "Processing..." : "Upgrade"}
                     </Button>
                   )}
                 </div>

@@ -24,14 +24,17 @@ export async function POST(request: NextRequest) {
     }
 
     const plan = SUBSCRIPTION_PLANS[planId];
-    
-    if (planId === 'free') {
-      return NextResponse.json({ error: "Cannot create subscription for free plan" }, { status: 400 });
+
+    if (planId === "free") {
+      return NextResponse.json(
+        { error: "Cannot create subscription for free plan" },
+        { status: 400 }
+      );
     }
 
     await connectDB();
     const user = await User.findById(decoded.userId);
-    
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -43,7 +46,6 @@ export async function POST(request: NextRequest) {
       customerName: user.name,
     });
 
-    // Update user with customer ID if new
     if (!user.subscription.razorpayCustomerId) {
       user.subscription.razorpayCustomerId = customerId;
       await user.save();
@@ -53,7 +55,7 @@ export async function POST(request: NextRequest) {
       success: true,
       subscriptionId: subscription.id,
       planId,
-      amount: plan.price * 100, // Convert to paise
+      amount: plan.price * 100, 
     });
   } catch (error) {
     console.error("Create subscription error:", error);

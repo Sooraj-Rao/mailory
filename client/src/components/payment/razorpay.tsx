@@ -18,7 +18,7 @@ export async function createRazorpayCustomer(email: string, name: string) {
     const customer = await razorpay.customers.create({
       name,
       email,
-      contact: "", // Optional phone number
+      contact: "",
     });
     return customer;
   } catch (error) {
@@ -43,7 +43,7 @@ export async function createSubscription({
 
     const subscription = await razorpay.subscriptions.create({
       plan_id: planId,
-      customer_id: customerId,
+      // customer_id: customerId,
       quantity: 1,
       total_count: 12, // 12 months
       addons: [],

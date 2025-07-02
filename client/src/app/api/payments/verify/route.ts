@@ -5,7 +5,6 @@ import User from "@/models/User";
 import { verifyPaymentSignature } from "@/components/payment/razorpay";
 import { getPlanLimits } from "@/components/payment/subscription-modal";
 
-
 export async function POST(request: NextRequest) {
   try {
     const token = await getAuthToken();
@@ -25,7 +24,6 @@ export async function POST(request: NextRequest) {
       planId,
     } = await request.json();
 
-    // Verify payment signature
     const isValid = verifyPaymentSignature(
       razorpay_payment_id,
       razorpay_subscription_id,

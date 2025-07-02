@@ -9,17 +9,20 @@ const router = Router();
 // Get overview statistics
 router.get("/overview", async (req: Request, res: Response) => {
   try {
-    // Get email statistics
-    const emailStats = await BatchEmail.aggregate([
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
+    const [emailStats, userCount, sesQuota] = await Promise.all([
+      BatchEmail.aggregate([
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+          },
         },
-      },
+      ]),
+      User.countDocuments(),
+      EmailService.getInstance().getSendQuota(),
     ]);
 
-    const emails = {
+    const stats = {
       pending: 0,
       processing: 0,
       sent: 0,
@@ -28,47 +31,19 @@ router.get("/overview", async (req: Request, res: Response) => {
     };
 
     emailStats.forEach((stat) => {
-      if (stat._id in emails) {
-        emails[stat._id as keyof typeof emails] = stat.count;
-      }
-      emails.total += stat.count;
+      stats[stat._id as keyof typeof stats] = stat.count;
+      stats.total += stat.count;
     });
 
-    // Get user count
-    const userCount = await User.countDocuments();
-
-    // Get SES quota
-    const emailService = EmailService.getInstance();
-    let sesQuota = {
-      max24HourSend: 0,
-      maxSendRate: 0,
-      sentLast24Hours: 0,
-      configured: false,
-    };
-
-    if (emailService.isConfigured()) {
-      try {
-        const quota = await emailService.getSendQuota();
-        sesQuota = {
-          max24HourSend: quota.Max24HourSend || 0,
-          maxSendRate: quota.MaxSendRate || 0,
-          sentLast24Hours: quota.SentLast24Hours || 0,
-          configured: true,
-        };
-      } catch (error: any) {
-        logger.error("Failed to get SES quota:", {
-          service: "email-worker",
-          name: error.name,
-          ...error,
-        });
-      }
-    }
-
     res.json({
-      emails,
+      emails: stats,
       users: userCount,
-      sesQuota,
-      sesConfigured: emailService.isConfigured(),
+      sesQuota: {
+        max24HourSend: sesQuota.Max24HourSend,
+        maxSendRate: sesQuota.MaxSendRate,
+        sentLast24Hours: sesQuota.SentLast24Hours,
+        configured: EmailService.getInstance().isConfigured(),
+      },
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
@@ -80,7 +55,7 @@ router.get("/overview", async (req: Request, res: Response) => {
   }
 });
 
-// Get hourly statistics for the last 24 hours
+// Get hourly email statistics for the last 24 hours
 router.get("/hourly", async (req: Request, res: Response) => {
   try {
     const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -105,26 +80,24 @@ router.get("/hourly", async (req: Request, res: Response) => {
       },
     ]);
 
-    // Format data for frontend
-    const hours = Array.from({ length: 24 }, (_, i) => ({
-      hour: i,
-      sent: 0,
-      failed: 0,
+    // Format data for frontend consumption
+    const formattedStats = Array.from({ length: 24 }, (_, hour) => ({
+      hour,
       pending: 0,
       processing: 0,
+      sent: 0,
+      failed: 0,
     }));
 
     hourlyStats.forEach((stat) => {
       const hourIndex = stat._id.hour;
-      const status = stat._id.status;
-      if (hours[hourIndex] && status in hours[hourIndex]) {
-        hours[hourIndex][status as keyof (typeof hours)[0]] = stat.count;
-      }
+      formattedStats[hourIndex][
+        stat._id.status as keyof (typeof formattedStats)[0]
+      ] = stat.count;
     });
 
     res.json({
-      hourlyStats: hours,
-      period: "24 hours",
+      hourlyStats: formattedStats,
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
@@ -141,17 +114,24 @@ router.get("/users/:userId", async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
 
-    const userStats = await BatchEmail.aggregate([
-      {
-        $match: { userId: userId },
-      },
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
+    const [emailStats, user] = await Promise.all([
+      BatchEmail.aggregate([
+        {
+          $match: { userId },
         },
-      },
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      User.findById(userId).exec(),
     ]);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const stats = {
       pending: 0,
@@ -161,19 +141,19 @@ router.get("/users/:userId", async (req: Request, res: Response) => {
       total: 0,
     };
 
-    userStats.forEach((stat) => {
-      if (stat._id in stats) {
-        stats[stat._id as keyof typeof stats] = stat.count;
-      }
+    emailStats.forEach((stat) => {
+      stats[stat._id as keyof typeof stats] = stat.count;
       stats.total += stat.count;
     });
 
-    // Get user info
-    const user = await User.findById(userId).select("email subscription");
-
     res.json({
-      user,
-      emailStats: stats,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        subscription: user.subscription,
+      },
+      emails: stats,
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
