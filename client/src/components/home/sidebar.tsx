@@ -223,27 +223,17 @@ export function CustomSidebar({ isOpen, onToggle }: CustomSidebarProps) {
             <div className="space-y-1">
               {settingsItems.map((item) => (
                 <div key={item.title}>
-                  {item.badge ? (
-                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground cursor-not-allowed">
-                      <item.icon className="w-4 h-4" />
-                      <span className="flex-1">{item.title}</span>
-                      <span className="px-2 py-0.5 text-xs bg-yellow-500/20 text-yellow-400 rounded-full border border-yellow-500/30">
-                        {item.badge}
-                      </span>
-                    </div>
-                  ) : (
-                    <Link
-                      href={item.url}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${
-                        isActive(item.url)
-                          ? "bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 text-foreground shadow-lg shadow-primary/10"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      }`}
-                    >
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  )}
+                  <Link
+                    href={item.url}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${
+                      isActive(item.url)
+                        ? "bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 text-foreground shadow-lg shadow-primary/10"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span>{item.title}</span>
+                  </Link>
                 </div>
               ))}
             </div>

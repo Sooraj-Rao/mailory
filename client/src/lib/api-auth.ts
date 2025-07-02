@@ -4,7 +4,6 @@ import connectDB from "./mongodb";
 import ApiKey from "@/models/ApiKey";
 import User from "@/models/User";
 
-const DAILY_EMAIL_LIMIT = 100; //  daily limit
 
 export async function validateApiKey(
   request: NextRequest
