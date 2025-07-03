@@ -20,6 +20,8 @@ import {
   ArrowRight,
   BarChart3,
   Zap,
+  Crown,
+  AlertTriangle,
 } from "lucide-react";
 import { SidebarTrigger } from "@/components/home/sidebar";
 import Link from "next/link";
@@ -41,6 +43,18 @@ interface EmailStats {
     sent: number;
     failed: number;
     total: number;
+  };
+  limits: {
+    dailyLimit: number;
+    monthlyLimit: number;
+    dailyUsed: number;
+    monthlyUsed: number;
+    dailyRemaining: number;
+    monthlyRemaining: number;
+  };
+  subscription: {
+    plan: string;
+    status: string;
   };
   recentEmails: Array<{
     to: string;
@@ -82,6 +96,8 @@ export default function SendEmailPage() {
       const data = await response.json();
       if (response.ok) {
         setEmailStats(data);
+      } else {
+        setError(data.error || "Failed to fetch email stats");
       }
     } catch {
       setError("Failed to fetch email stats");
@@ -95,6 +111,25 @@ export default function SendEmailPage() {
     setRefreshing(false);
     setSuccess("Data refreshed!");
     setTimeout(() => setSuccess(""), 2000);
+  };
+
+  const getPlanColor = (plan: string) => {
+    switch (plan) {
+      case "free":
+        return "bg-gray-500";
+      case "starter":
+        return "bg-blue-500";
+      case "pro":
+        return "bg-purple-500";
+      case "premium":
+        return "bg-gold-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  const getPlanName = (plan: string) => {
+    return plan.charAt(0).toUpperCase() + plan.slice(1);
   };
 
   if (!user) {
@@ -112,23 +147,35 @@ export default function SendEmailPage() {
           <SidebarTrigger />
           <div className="flex items-center justify-between w-full ml-4">
             <div>
-              <h1 className="text-xl font-bold  flex items-center gap-2">
+              <h1 className="text-xl font-bold flex items-center gap-2">
                 Send Email API
               </h1>
               <p className="text-muted-foreground text-sm">
                 Transactional email service
               </p>
             </div>
-            <Button
-              onClick={refreshData}
-              variant="outline"
-              disabled={refreshing}
-            >
-              <RefreshCw
-                className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-4">
+              {emailStats && (
+                <Badge
+                  className={`${getPlanColor(
+                    emailStats.subscription.plan
+                  )} hover:${getPlanColor(emailStats.subscription.plan)}`}
+                >
+                  <Crown className="w-3 h-3 mr-1" />
+                  {getPlanName(emailStats.subscription.plan)} Plan
+                </Badge>
+              )}
+              <Button
+                onClick={refreshData}
+                variant="outline"
+                disabled={refreshing}
+              >
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -145,6 +192,22 @@ export default function SendEmailPage() {
           </Alert>
         )}
 
+        {/* Limit Warning */}
+        {emailStats && emailStats.limits.dailyRemaining <= 10 && (
+          <Alert className="mb-6 border-yellow-500/50 text-yellow-600 dark:border-yellow-500 [&>svg]:text-yellow-600">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Warning: You have only {emailStats.limits.dailyRemaining} emails
+              remaining today.
+              {emailStats.subscription.plan === "free" && (
+                <Link href="/dashboard/billing" className="ml-2 underline">
+                  Upgrade your plan for higher limits.
+                </Link>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
         {emailStats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card className="card-gradient">
@@ -152,7 +215,7 @@ export default function SendEmailPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
-                      Today&apos;s Emails
+                      Today&apos;s API Calls
                     </p>
                     <p className="text-3xl font-bold text-foreground">
                       {emailStats.today.total}
@@ -174,13 +237,13 @@ export default function SendEmailPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
-                      Remaining Today
+                      Daily Remaining
                     </p>
                     <p className="text-3xl font-bold text-foreground">
-                      {emailStats.today.remaining}
+                      {emailStats.limits.dailyRemaining}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      out of 100 daily limit
+                      out of {emailStats.limits.dailyLimit} daily limit
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
@@ -195,12 +258,14 @@ export default function SendEmailPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
-                      Total Sent
+                      Monthly Remaining
                     </p>
                     <p className="text-3xl font-bold text-foreground">
-                      {emailStats.total.sent}
+                      {emailStats.limits.monthlyRemaining}
                     </p>
-                    <p className="text-xs text-muted-foreground">all time</p>
+                    <p className="text-xs text-muted-foreground">
+                      out of {emailStats.limits.monthlyLimit} monthly
+                    </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-white" />
@@ -268,7 +333,7 @@ export default function SendEmailPage() {
         </Card>
 
         {/* API Documentation */}
-        {/* <Card className="card-gradient">
+        <Card className="card-gradient">
           <CardHeader>
             <CardTitle>API Documentation</CardTitle>
             <CardDescription>
@@ -326,14 +391,20 @@ Authorization: Bearer YOUR_API_KEY`}
 
             <div>
               <h3 className="text-lg font-semibold mb-2">Rate Limits</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>50 emails per day on the free plan</li>
-                <li>Rate limit resets at midnight UTC</li>
-                <li>HTTP 429 status code when limit exceeded</li>
-              </ul>
+              {emailStats && (
+                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                  <li>
+                    {emailStats.limits.dailyLimit} emails per day on{" "}
+                    {emailStats.subscription.plan} plan
+                  </li>
+                  <li>{emailStats.limits.monthlyLimit} emails per month</li>
+                  <li>Rate limit resets daily at midnight UTC</li>
+                  <li>HTTP 429 status code when limit exceeded</li>
+                </ul>
+              )}
             </div>
           </CardContent>
-        </Card> */}
+        </Card>
 
         {/* Recent Emails */}
         {emailStats && (
@@ -341,7 +412,7 @@ Authorization: Bearer YOUR_API_KEY`}
             <CardHeader>
               <CardTitle className="text-foreground flex items-center">
                 <BarChart3 className="w-5 h-5 mr-2" />
-                Recent Activity
+                Recent API Activity
               </CardTitle>
               <CardDescription>
                 Your latest transactional email activity

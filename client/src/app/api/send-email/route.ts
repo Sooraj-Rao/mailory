@@ -9,6 +9,7 @@ import {
 } from "@/lib/api-auth";
 import connectDB from "@/lib/mongodb";
 import EmailLog from "@/models/EmailLog";
+import User from "@/models/User";
 
 export async function POST(request: NextRequest) {
   try {
@@ -97,6 +98,14 @@ export async function POST(request: NextRequest) {
       emailLog.messageId = result.messageId;
       await emailLog.save();
 
+      // Increment user's email count
+      await User.findByIdAndUpdate(userId, {
+        $inc: {
+          "emailLimits.dailyUsed": 1,
+          "emailLimits.monthlyUsed": 1,
+        },
+      });
+
       return setCorsHeaders(
         NextResponse.json(
           { success: true, messageId: result.messageId },
@@ -107,6 +116,14 @@ export async function POST(request: NextRequest) {
       emailLog.status = "failed";
       emailLog.error = emailError.message;
       await emailLog.save();
+
+      // Still increment the count for failed emails (they count towards the limit)
+      await User.findByIdAndUpdate(userId, {
+        $inc: {
+          "emailLimits.dailyUsed": 1,
+          "emailLimits.monthlyUsed": 1,
+        },
+      });
 
       console.error("Email sending error:", emailError);
       return setCorsHeaders(

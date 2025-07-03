@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import BatchEmail from "@/models/BatchEmail";
+import User from "@/models/User";
 import { getAuthToken, verifyAuthToken } from "@/lib/auth-cookies";
 import { randomBytes } from "crypto";
 import { checkRateLimit, getRateLimitError } from "@/lib/api-auth";
@@ -52,9 +53,44 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
+    // Check if user has enough emails remaining for this batch
     const { allowed, dailyCount, monthlyCount, limits } = await checkRateLimit(
       decoded.userId
     );
+
+    // Check if the batch size exceeds remaining daily limit
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const now = new Date();
+    const lastReset = new Date(user.emailLimits.lastResetDate);
+    const daysSinceReset = Math.floor(
+      (now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    let currentDailyUsed = user.emailLimits.dailyUsed;
+    if (daysSinceReset >= 1) {
+      currentDailyUsed = 0;
+    }
+
+    const remainingDaily = user.emailLimits.dailyLimit - currentDailyUsed;
+
+    if (recipients.length > remainingDaily) {
+      return NextResponse.json(
+        {
+          error: `Not enough daily emails remaining. You have ${remainingDaily} emails left`,
+          limits: {
+            dailyLimit: user.emailLimits.dailyLimit,
+            dailyUsed: currentDailyUsed,
+            dailyRemaining: remainingDaily,
+          },
+        },
+        { status: 429 }
+      );
+    }
+
     if (!allowed) {
       return getRateLimitError(dailyCount, monthlyCount, limits);
     }
@@ -76,6 +112,14 @@ export async function POST(request: NextRequest) {
     }));
 
     await BatchEmail.insertMany(batchEmails);
+
+    // Increment user's email count for the entire batch
+    await User.findByIdAndUpdate(decoded.userId, {
+      $inc: {
+        "emailLimits.dailyUsed": recipients.length,
+        "emailLimits.monthlyUsed": recipients.length,
+      },
+    });
 
     // Notify the Express worker server that new emails are available
     try {

@@ -22,6 +22,8 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
+  Crown,
+  AlertTriangle,
 } from "lucide-react";
 import { SidebarTrigger } from "@/components/home/sidebar";
 import { useZustandStore } from "@/zustand/store";
@@ -37,6 +39,18 @@ interface EmailStats {
     sent: number;
     failed: number;
     total: number;
+  };
+  limits: {
+    dailyLimit: number;
+    monthlyLimit: number;
+    dailyUsed: number;
+    monthlyUsed: number;
+    dailyRemaining: number;
+    monthlyRemaining: number;
+  };
+  subscription: {
+    plan: string;
+    status: string;
   };
   recentEmails: Array<{
     to: string;
@@ -63,6 +77,8 @@ export default function DashboardPage() {
       const data = await response.json();
       if (response.ok) {
         setEmailStats(data);
+      } else {
+        setError(data.error || "Failed to fetch email stats");
       }
     } catch {
       setError("Failed to fetch email stats");
@@ -76,6 +92,25 @@ export default function DashboardPage() {
     setRefreshing(false);
     setSuccess("Data refreshed!");
     setTimeout(() => setSuccess(""), 2000);
+  };
+
+  const getPlanColor = (plan: string) => {
+    switch (plan) {
+      case "free":
+        return "bg-gray-500";
+      case "starter":
+        return "bg-blue-500";
+      case "pro":
+        return "bg-purple-500";
+      case "premium":
+        return "bg-gold-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  const getPlanName = (plan: string) => {
+    return plan.charAt(0).toUpperCase() + plan.slice(1);
   };
 
   if (!userData) {
@@ -98,16 +133,28 @@ export default function DashboardPage() {
                 Welcome, {userData?.name}
               </p>
             </div>
-            <Button
-              onClick={refreshData}
-              variant="outline"
-              disabled={refreshing}
-            >
-              <RefreshCw
-                className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-4">
+              {emailStats && (
+                <Badge
+                  className={`${getPlanColor(
+                    emailStats.subscription.plan
+                  )} hover:${getPlanColor(emailStats.subscription.plan)}`}
+                >
+                  <Crown className="w-3 h-3 mr-1" />
+                  {getPlanName(emailStats.subscription.plan)} Plan
+                </Badge>
+              )}
+              <Button
+                onClick={refreshData}
+                variant="outline"
+                disabled={refreshing}
+              >
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -122,6 +169,23 @@ export default function DashboardPage() {
         {success && (
           <Alert className="mb-6 border-green-500/50 text-green-600 dark:border-green-500 [&>svg]:text-green-600">
             <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Limit Warning */}
+        {emailStats && emailStats.limits.dailyRemaining <= 10 && (
+          <Alert className="mb-6 border-yellow-500/50 text-yellow-600 dark:border-yellow-500 [&>svg]:text-yellow-600">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Warning: You have only {emailStats.limits.dailyRemaining} emails
+              remaining today out of your {emailStats.limits.dailyLimit} daily
+              limit.
+              {emailStats.subscription.plan === "free" && (
+                <Link href="/dashboard/billing" className="ml-2 underline">
+                  Upgrade your plan for higher limits.
+                </Link>
+              )}
+            </AlertDescription>
           </Alert>
         )}
 
@@ -155,13 +219,13 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
-                      Remaining Today
+                      Daily Remaining
                     </p>
                     <p className="text-3xl font-bold text-foreground">
-                      {emailStats.today.remaining}
+                      {emailStats.limits.dailyRemaining}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      out of 100 daily limit
+                      out of {emailStats.limits.dailyLimit} daily limit
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
@@ -176,12 +240,14 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
-                      Total Sent
+                      Monthly Remaining
                     </p>
                     <p className="text-3xl font-bold text-foreground">
-                      {emailStats.total.sent}
+                      {emailStats.limits.monthlyRemaining}
                     </p>
-                    <p className="text-xs text-muted-foreground">all time</p>
+                    <p className="text-xs text-muted-foreground">
+                      out of {emailStats.limits.monthlyLimit} monthly limit
+                    </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-white" />
@@ -237,7 +303,11 @@ export default function DashboardPage() {
                     </CardDescription>
                   </div>
                 </div>
-                {/* Removed specific daily limit badge */}
+                {emailStats && (
+                  <Badge variant="outline" className="text-xs">
+                    {emailStats.limits.dailyRemaining} left today
+                  </Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -246,7 +316,11 @@ export default function DashboardPage() {
                 Use your API key to send emails programmatically.
               </p>
               <Link href="/dashboard/send-email">
-                <Button variant="grad1" className="w-full l">
+                <Button
+                  variant="grad1"
+                  className="w-full"
+                  disabled={emailStats?.limits.dailyRemaining === 0}
+                >
                   Get Started
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -270,7 +344,11 @@ export default function DashboardPage() {
                     </CardDescription>
                   </div>
                 </div>
-                {/* Removed specific daily limit badge */}
+                {emailStats && (
+                  <Badge variant="outline" className="text-xs">
+                    Max 100 per batch
+                  </Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -279,7 +357,11 @@ export default function DashboardPage() {
                 with advanced tracking and analytics.
               </p>
               <Link href="/dashboard/batch-email">
-                <Button variant="grad2" className="w-full">
+                <Button
+                  variant="grad2"
+                  className="w-full"
+                  disabled={emailStats?.limits.dailyRemaining === 0}
+                >
                   Create Campaign
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

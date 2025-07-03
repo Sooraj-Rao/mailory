@@ -1,142 +1,145 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type NextRequest, NextResponse } from "next/server";
-import connectDB from "./mongodb";
-import ApiKey from "@/models/ApiKey";
-import User from "@/models/User";
+import { type NextRequest, NextResponse } from "next/server"
+import connectDB from "./mongodb"
+import ApiKey from "@/models/ApiKey"
+import User from "@/models/User"
 
-
-export async function validateApiKey(
-  request: NextRequest
-): Promise<{ isValid: boolean; apiKey?: any; userId?: string }> {
-  const authHeader = request.headers.get("authorization");
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return { isValid: false };
-  }
-
-  const apiKey = authHeader.substring(7);
-
+export async function validateApiKey(request: NextRequest) {
   try {
-    await connectDB();
-    console.log(User);
-    const keyDoc = await ApiKey.findOne({
-      keyValue: apiKey,
-      isActive: true,
-    }).populate("userId");
-
-    if (!keyDoc) {
-      return { isValid: false };
+    const authHeader = request.headers.get("authorization")
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return { isValid: false, apiKey: null, userId: null }
     }
 
-    keyDoc.lastUsed = new Date();
-    await keyDoc.save();
+    const keyValue = authHeader.substring(7)
+    await connectDB()
+
+    const apiKey = await ApiKey.findOne({ keyValue }).populate("userId")
+    if (!apiKey) {
+      return { isValid: false, apiKey: null, userId: null }
+    }
+
+    // Update last used timestamp
+    await ApiKey.findByIdAndUpdate(apiKey._id, { lastUsed: new Date() })
 
     return {
       isValid: true,
-      apiKey: keyDoc,
-      userId: keyDoc.userId._id.toString(),
-    };
+      apiKey,
+      userId: apiKey.userId,
+    }
   } catch (error) {
-    console.log(error);
-    return { isValid: false };
+    console.error("API key validation error:", error)
+    return { isValid: false, apiKey: null, userId: null }
   }
 }
 
-export async function checkRateLimit(
-  userId: string
-): Promise<{
-  allowed: boolean;
-  dailyCount: number;
-  monthlyCount: number;
-  limits: { daily: number; monthly: number };
-}> {
+export async function checkRateLimit(userId: string) {
   try {
-    await connectDB();
+    await connectDB()
 
-    // Get user with subscription info
-    const user = await User.findById(userId);
+    const user = await User.findById(userId)
     if (!user) {
       return {
         allowed: false,
         dailyCount: 0,
         monthlyCount: 0,
-        limits: { daily: 0, monthly: 0 },
-      };
+        limits: { dailyLimit: 0, monthlyLimit: 0 },
+      }
     }
 
     // Reset counters if needed
-    const now = new Date();
-    const lastReset = new Date(user.emailLimits.lastResetDate);
+    const now = new Date()
+    const lastReset = new Date(user.emailLimits.lastResetDate)
+    const daysSinceReset = Math.floor((now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24))
+
+    let dailyUsed = user.emailLimits.dailyUsed
+    let monthlyUsed = user.emailLimits.monthlyUsed
 
     // Reset daily counter if it's a new day
-    if (
-      now.getDate() !== lastReset.getDate() ||
-      now.getMonth() !== lastReset.getMonth() ||
-      now.getFullYear() !== lastReset.getFullYear()
-    ) {
-      user.emailLimits.dailyUsed = 0;
+    if (daysSinceReset >= 1) {
+      dailyUsed = 0
     }
 
-    // Reset monthly counter if it's a new month
-    if (
-      now.getMonth() !== lastReset.getMonth() ||
-      now.getFullYear() !== lastReset.getFullYear()
-    ) {
-      user.emailLimits.monthlyUsed = 0;
+    // Reset monthly counter if it's been 30+ days
+    if (daysSinceReset >= 30) {
+      monthlyUsed = 0
+      // Update the reset date
+      await User.findByIdAndUpdate(userId, {
+        "emailLimits.dailyUsed": 0,
+        "emailLimits.monthlyUsed": 0,
+        "emailLimits.lastResetDate": now,
+      })
+    } else if (daysSinceReset >= 1) {
+      // Just reset daily
+      await User.findByIdAndUpdate(userId, {
+        "emailLimits.dailyUsed": 0,
+      })
     }
 
-    user.emailLimits.lastResetDate = now;
-    await user.save();
-
-    const dailyAllowed =
-      user.emailLimits.dailyUsed < user.emailLimits.dailyLimit;
-    const monthlyAllowed =
-      user.emailLimits.monthlyUsed < user.emailLimits.monthlyLimit;
+    // Check if user has exceeded limits
+    const dailyAllowed = dailyUsed < user.emailLimits.dailyLimit
+    const monthlyAllowed = monthlyUsed < user.emailLimits.monthlyLimit
 
     return {
       allowed: dailyAllowed && monthlyAllowed,
-      dailyCount: user.emailLimits.dailyUsed,
-      monthlyCount: user.emailLimits.monthlyUsed,
+      dailyCount: dailyUsed,
+      monthlyCount: monthlyUsed,
       limits: {
-        daily: user.emailLimits.dailyLimit,
-        monthly: user.emailLimits.monthlyLimit,
+        dailyLimit: user.emailLimits.dailyLimit,
+        monthlyLimit: user.emailLimits.monthlyLimit,
       },
-    };
+    }
   } catch (error) {
-    console.error("Rate limit check error:", error);
+    console.error("Rate limit check error:", error)
     return {
       allowed: false,
       dailyCount: 0,
       monthlyCount: 0,
-      limits: { daily: 0, monthly: 0 },
-    };
+      limits: { dailyLimit: 0, monthlyLimit: 0 },
+    }
   }
 }
 
-export function getApiKeyError(): NextResponse {
+export function getApiKeyError() {
   return NextResponse.json(
     {
-      error: "Invalid or missing Authorization header. Use 'Bearer {api_key}'",
+      error: "Invalid or missing API key",
+      message: "Please provide a valid API key in the Authorization header",
     },
-    { status: 401 }
-  );
+    { status: 401 },
+  )
 }
 
-export function getRateLimitError(
-  dailyCount: number,
-  monthlyCount: number,
-  limits: { daily: number; monthly: number }
-): NextResponse {
+export function getRateLimitError(dailyCount: number, monthlyCount: number, limits: any) {
+  const isDaily = dailyCount >= limits.dailyLimit
+  const isMonthly = monthlyCount >= limits.monthlyLimit
+
+  let message = "Rate limit exceeded. "
+  if (isDaily) {
+    message += `Daily limit of ${limits.dailyLimit} emails reached. `
+  }
+  if (isMonthly) {
+    message += `Monthly limit of ${limits.monthlyLimit} emails reached. `
+  }
+  message += "Upgrade your plan for higher limits."
+
   return NextResponse.json(
     {
       error: "Rate limit exceeded",
-      message: `Daily: ${dailyCount}/${limits.daily}, Monthly: ${monthlyCount}/${limits.monthly}. Upgrade your plan for higher limits.`,
-      limits,
-      usage: {
-        daily: dailyCount,
-        monthly: monthlyCount,
+      message,
+      limits: {
+        daily: {
+          limit: limits.dailyLimit,
+          used: dailyCount,
+          remaining: Math.max(0, limits.dailyLimit - dailyCount),
+        },
+        monthly: {
+          limit: limits.monthlyLimit,
+          used: monthlyCount,
+          remaining: Math.max(0, limits.monthlyLimit - monthlyCount),
+        },
       },
     },
-    { status: 429 }
-  );
+    { status: 429 },
+  )
 }

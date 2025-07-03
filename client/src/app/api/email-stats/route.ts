@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import EmailLog from "@/models/EmailLog";
+import BatchEmail from "@/models/BatchEmail";
+import User from "@/models/User";
 import { getAuthToken, verifyAuthToken } from "@/lib/auth-cookies";
-import mongoose from "mongoose";
 
 export async function GET() {
   try {
@@ -18,44 +20,128 @@ export async function GET() {
 
     await connectDB();
 
-    const userId = new mongoose.Types.ObjectId(decoded.userId);
+    // Get user data with current limits
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
+    // Reset daily/monthly counters if needed
+    const now = new Date();
+    const lastReset = new Date(user.emailLimits.lastResetDate);
+    const daysSinceReset = Math.floor(
+      (now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
-    const [todayStats, totalStats, recentEmails] = await Promise.all([
-      EmailLog.aggregate([
-        { $match: { userId, sentAt: { $gte: today } } },
-        { $group: { _id: "$status", count: { $sum: 1 } } },
-      ]),
-      EmailLog.aggregate([
-        { $match: { userId } },
-        { $group: { _id: "$status", count: { $sum: 1 } } },
-      ]),
-      EmailLog.find({ userId })
-        .sort({ sentAt: -1 })
-        .limit(3)
-        .select("to subject status sentAt messageId"),
-    ]);
+    let dailyUsed = user.emailLimits.dailyUsed;
+    let monthlyUsed = user.emailLimits.monthlyUsed;
 
-    const todayCount = todayStats.reduce((acc, stat) => acc + stat.count, 0);
-    const sentToday = todayStats.find((s) => s._id === "sent")?.count || 0;
-    const failedToday = todayStats.find((s) => s._id === "failed")?.count || 0;
+    // Reset daily counter if it's a new day
+    if (daysSinceReset >= 1) {
+      dailyUsed = 0;
+    }
 
-    const totalSent = totalStats.find((s) => s._id === "sent")?.count || 0;
-    const totalFailed = totalStats.find((s) => s._id === "failed")?.count || 0;
+    // Reset monthly counter if it's been 30+ days
+    if (daysSinceReset >= 30) {
+      monthlyUsed = 0;
+      // Update the reset date
+      await User.findByIdAndUpdate(decoded.userId, {
+        "emailLimits.dailyUsed": 0,
+        "emailLimits.monthlyUsed": 0,
+        "emailLimits.lastResetDate": now,
+      });
+    } else if (daysSinceReset >= 1) {
+      // Just reset daily
+      await User.findByIdAndUpdate(decoded.userId, {
+        "emailLimits.dailyUsed": 0,
+      });
+    }
+
+    // Get today's email stats from EmailLog (API emails)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const todayApiEmails = await EmailLog.find({
+      userId: decoded.userId,
+      createdAt: { $gte: startOfDay },
+    });
+
+    // Get today's batch emails
+    const todayBatchEmails = await BatchEmail.find({
+      userId: decoded.userId,
+      createdAt: { $gte: startOfDay },
+    });
+
+    // Calculate today's totals
+    const todaySent =
+      todayApiEmails.filter((e) => e.status === "sent").length +
+      todayBatchEmails.filter((e) => e.status === "sent").length;
+    const todayFailed =
+      todayApiEmails.filter((e) => e.status === "failed").length +
+      todayBatchEmails.filter((e) => e.status === "failed").length;
+    const todayTotal = todaySent + todayFailed;
+
+    // Get all-time stats
+    const allApiEmails = await EmailLog.find({ userId: decoded.userId });
+    const allBatchEmails = await BatchEmail.find({ userId: decoded.userId });
+
+    const totalSent =
+      allApiEmails.filter((e) => e.status === "sent").length +
+      allBatchEmails.filter((e) => e.status === "sent").length;
+    const totalFailed =
+      allApiEmails.filter((e) => e.status === "failed").length +
+      allBatchEmails.filter((e) => e.status === "failed").length;
+    const totalAll = totalSent + totalFailed;
+
+    // Get recent emails for activity feed
+    const recentApiEmails = await EmailLog.find({ userId: decoded.userId })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    const recentBatchEmails = await BatchEmail.find({ userId: decoded.userId })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    const allRecentEmails = [...recentApiEmails, ...recentBatchEmails]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      .slice(0, 10);
+
+    const recentEmails = allRecentEmails.map((email) => ({
+      to: email.to,
+      subject: email.subject,
+      status: email.status,
+      sentAt: email.createdAt,
+    }));
 
     return NextResponse.json({
       today: {
-        sent: sentToday,
-        failed: failedToday,
-        total: todayCount,
-        remaining: Math.max(0, 100 - todayCount),
+        sent: todaySent,
+        failed: todayFailed,
+        total: todayTotal,
+        remaining: Math.max(0, user.emailLimits.dailyLimit - todayTotal),
       },
       total: {
         sent: totalSent,
         failed: totalFailed,
-        total: totalSent + totalFailed,
+        total: totalAll,
+      },
+      limits: {
+        dailyLimit: user.emailLimits.dailyLimit,
+        monthlyLimit: user.emailLimits.monthlyLimit,
+        dailyUsed: todayTotal,
+        monthlyUsed: monthlyUsed,
+        dailyRemaining: Math.max(0, user.emailLimits.dailyLimit - todayTotal),
+        monthlyRemaining: Math.max(
+          0,
+          user.emailLimits.monthlyLimit - monthlyUsed
+        ),
+      },
+      subscription: {
+        plan: user.subscription.plan,
+        status: user.subscription.status,
       },
       recentEmails,
     });
