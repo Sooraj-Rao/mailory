@@ -76,7 +76,6 @@ export async function POST(request: NextRequest) {
     });
 
     try {
-      // Send email via Express server
       const workerUrl = process.env.EMAIL_WORKER_URL || "http://localhost:4000";
       const response = await fetch(`${workerUrl}/api/v1/email/send`, {
         method: "POST",
@@ -96,6 +95,7 @@ export async function POST(request: NextRequest) {
 
       emailLog.status = "sent";
       emailLog.messageId = result.messageId;
+
       await emailLog.save();
 
       // Increment user's email count

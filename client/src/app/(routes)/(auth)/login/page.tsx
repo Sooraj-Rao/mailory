@@ -29,7 +29,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (userData) {
-      router.push("/dashboard/overview");
+      router.push("/dashboard/emails");
     }
   }, [userData]);
 
@@ -48,7 +48,7 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        router.push("/dashboard/overview");
+        router.push("/dashboard/emails");
       } else {
         setError(data.error);
       }

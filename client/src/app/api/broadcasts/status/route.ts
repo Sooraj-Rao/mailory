@@ -25,7 +25,9 @@ export async function GET(request: Request) {
         batchId,
         userId: new mongoose.Types.ObjectId(decoded.userId),
       })
-        .select("to status error messageId processedAt attempts")
+        .select(
+          "to status error messageId processedAt attempts from html text subject"
+        )
         .sort({ createdAt: 1 });
 
       const stats = await BatchEmail.aggregate([
@@ -58,6 +60,12 @@ export async function GET(request: Request) {
         batchId,
         stats: statusCounts,
         emails: batchEmails,
+        subject: batchEmails[0].subject,
+        from: batchEmails[0].from,
+        htmlContent: batchEmails[0].html,
+        previewText: batchEmails[0].text,
+        createdAt: batchEmails[0].createdAt,
+        sentAt: batchEmails[0].processedAt,
       });
     } else {
       console.log("Fetching batches for user:", decoded.userId);

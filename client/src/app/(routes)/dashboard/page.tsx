@@ -8,7 +8,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (router) {
-      router.push("/dashboard/overview");
+      router.push("/dashboard/emails");
     }
   }, [router]);
 

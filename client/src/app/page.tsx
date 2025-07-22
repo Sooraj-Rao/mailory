@@ -15,7 +15,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (userData) {
-      router.push("/dashboard/overview");
+      router.push("/dashboard/emails");
       return;
     }
   }, [userData]);

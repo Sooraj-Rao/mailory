@@ -93,28 +93,36 @@ export async function GET() {
       allBatchEmails.filter((e) => e.status === "failed").length;
     const totalAll = totalSent + totalFailed;
 
-    // Get recent emails for activity feed
     const recentApiEmails = await EmailLog.find({ userId: decoded.userId })
-      .sort({ createdAt: -1 })
+      .sort({ sentAt: -1 })
       .limit(5);
 
     const recentBatchEmails = await BatchEmail.find({ userId: decoded.userId })
       .sort({ createdAt: -1 })
       .limit(5);
 
-    const allRecentEmails = [...recentApiEmails, ...recentBatchEmails]
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-      .slice(0, 10);
 
-    const recentEmails = allRecentEmails.map((email) => ({
+    const allRecentEmails = [...recentApiEmails, ...recentBatchEmails];
+
+    const allRecentEmailsSorted = allRecentEmails.sort((a, b) => {
+      const dateA = a.sentAt
+        ? new Date(a.sentAt).getTime()
+        : new Date(a.createdAt).getTime();
+      const dateB = b.sentAt
+        ? new Date(b.sentAt).getTime()
+        : new Date(b.createdAt).getTime();
+      return dateB - dateA; 
+    });
+
+    const topRecentEmails = allRecentEmailsSorted.slice(0, 10);
+
+    const recentEmails = topRecentEmails.map((email) => ({
       to: email.to,
       subject: email.subject,
       status: email.status,
-      sentAt: email.createdAt,
+      sentAt: email?.sentAt || email?.createdAt, 
     }));
+
 
     return NextResponse.json({
       today: {
@@ -143,7 +151,7 @@ export async function GET() {
         plan: user.subscription.plan,
         status: user.subscription.status,
       },
-      recentEmails,
+      recentEmails, 
     });
   } catch (error) {
     console.error("Email stats error:", error);

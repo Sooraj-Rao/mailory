@@ -5,7 +5,7 @@ import EmailLog from "@/models/EmailLog"
 import { getAuthToken, verifyAuthToken } from "@/lib/auth-cookies"
 import { randomBytes } from "crypto"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const token = await getAuthToken()
     if (!token) {

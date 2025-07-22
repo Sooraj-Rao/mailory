@@ -31,7 +31,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (userData) {
-      router.push("/dashboard/overview");
+      router.push("/dashboard/emails");
     }
   }, [userData]);
 
@@ -50,7 +50,7 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (data.success) {
-        router.push("/dashboard/overview");
+        router.push("/dashboard/emails");
       } else {
         setError(data.error);
       }

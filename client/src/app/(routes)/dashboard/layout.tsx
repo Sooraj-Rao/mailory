@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CustomSidebar } from "@/components/home/sidebar";
 import { useUser } from "@/hooks/user/auth-user";
+import DashboardHeader from "@/components/home/dashboard-header";
 
 export default function DashboardLayout({
   children,
@@ -20,23 +21,28 @@ export default function DashboardLayout({
       router.push("/login");
       return;
     }
-  }, [userData]);
+  }, [userData, userDataLoading, router]);
 
-  if (!router) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
+  // if (!userData && userDataLoading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <div className="text-foreground">Loading...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-background">
       <CustomSidebar
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
       />
-      <div className="flex-1 flex flex-col overflow-y-scroll">{children}</div>
+
+      {/* Main content area with proper margin for sidebar */}
+      <div className="md:ml-60">
+        <DashboardHeader />
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </div>
     </div>
   );
 }

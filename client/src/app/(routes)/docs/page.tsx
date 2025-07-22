@@ -41,8 +41,8 @@ const sidebarItems = [
     icon: Send,
   },
   {
-    title: "Batch Email API",
-    id: "batch-email",
+    title: "Broadcasts API",
+    id: "broadcasts",
     icon: Users,
   },
   {
@@ -284,7 +284,7 @@ export default function DocsPage() {
                     <div className="flex items-center gap-2 mb-4">
                       <Badge className="bg-green-600">POST</Badge>
                       <code className="text-sm bg-muted px-2 py-1 rounded">
-                        /api/send-email
+                        /api/emails
                       </code>
                     </div>
                     <p className="text-muted-foreground">
@@ -406,7 +406,7 @@ export default function DocsPage() {
                             typeof window !== "undefined"
                               ? window.location.origin
                               : { APP_URL }
-                          }/api/send-email \\
+                          }/api/emails \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
@@ -427,7 +427,7 @@ export default function DocsPage() {
                             typeof window !== "undefined"
                               ? window.location.origin
                               : { APP_URL }
-                          }/api/send-email', {
+                          }/api/emails', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -457,7 +457,7 @@ url = "${
                             typeof window !== "undefined"
                               ? window.location.origin
                               : { APP_URL }
-                          }/api/send-email"
+                          }/api/emails"
 
 headers = {
     "Content-Type": "application/json",
@@ -486,7 +486,7 @@ $url = "${
                             typeof window !== "undefined"
                               ? window.location.origin
                               : "https://email.soorajarao.in"
-                          }/api/send-email";
+                          }/api/emails";
 
 $data = [
     'to' => 'user@example.com',
@@ -551,7 +551,7 @@ echo $response;
             )}
 
             {/* Batch Email API */}
-            {activeSection === "batch-email" && (
+            {activeSection === "broadcasts" && (
               <div className="space-y-8">
                 <div>
                   <h1 className="text-2xl font-bold mb-4">Batch Email API</h1>
@@ -568,7 +568,7 @@ echo $response;
                     <div className="flex items-center gap-2 mb-4">
                       <Badge className="bg-green-600">POST</Badge>
                       <code className="text-sm bg-muted px-2 py-1 rounded">
-                        /api/batch-email/api
+                        /api/broadcasts/api
                       </code>
                     </div>
                     <p className="text-muted-foreground">
@@ -695,7 +695,7 @@ echo $response;
                             typeof window !== "undefined"
                               ? window.location.origin
                               : { APP_URL }
-                          }/api/batch-email/api \\
+                          }/api/broadcasts/api \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
@@ -720,7 +720,7 @@ echo $response;
                             typeof window !== "undefined"
                               ? window.location.origin
                               : { APP_URL }
-                          }/api/batch-email/api', {
+                          }/api/broadcasts/api', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -754,7 +754,7 @@ url = "${
                             typeof window !== "undefined"
                               ? window.location.origin
                               : { APP_URL }
-                          }/api/batch-email/api"
+                          }/api/broadcasts/api"
 
 headers = {
     "Content-Type": "application/json",
@@ -787,7 +787,7 @@ $url = "${
                             typeof window !== "undefined"
                               ? window.location.origin
                               : { APP_URL }
-                          }/api/batch-email/api";
+                          }/api/broadcasts/api";
 
 $data = [
     'recipients' => [
@@ -1195,7 +1195,7 @@ Content-Type: application/json
                         <CodeBlock
                           code={`async function sendEmail(emailData) {
   try {
-    const response = await fetch('/api/send-email', {
+    const response = await fetch('/api/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1245,7 +1245,7 @@ Content-Type: application/json
 import time
 
 def send_email(email_data, max_retries=3):
-    url = "/api/send-email"
+    url = "/api/emails"
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
