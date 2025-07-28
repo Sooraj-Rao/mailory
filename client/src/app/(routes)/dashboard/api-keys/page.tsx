@@ -1,138 +1,104 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import type React from "react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+
 import {
-  Copy,
-  Key,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
   RefreshCw,
+  Search,
+  Key,
+  Copy,
   Plus,
-  Trash2,
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  BarChart3,
-  Crown,
+  ExternalLink,
   AlertTriangle,
-} from "lucide-react"
-import { SidebarTrigger } from "@/components/home/sidebar"
-import Link from "next/link"
+} from "lucide-react";
+import { formatDistanceToNowStrict } from "date-fns";
+import { copyToClipboard } from "@/app/helper/copy";
 
 interface ApiKey {
-  id: string
-  keyName: string
-  keyValue?: string
-  createdAt: string
-  lastUsed: string | null
+  id: string;
+  keyName: string;
+  token: string;
+  createdAt: string;
+  lastUsed: string | null;
   stats: {
-    total: number
-    sent: number
-    failed: number
+    total: number;
+    sent: number;
+    failed: number;
     today: {
-      total: number
-      sent: number
-      failed: number
-    }
-  }
-}
-
-interface EmailStats {
-  today: {
-    sent: number
-    failed: number
-    total: number
-    remaining: number
-  }
-  total: {
-    sent: number
-    failed: number
-    total: number
-  }
-  limits: {
-    dailyLimit: number
-    monthlyLimit: number
-    dailyUsed: number
-    monthlyUsed: number
-    dailyRemaining: number
-    monthlyRemaining: number
-  }
-  subscription: {
-    plan: string
-    status: string
-  }
+      total: number;
+      sent: number;
+      failed: number;
+    };
+  };
 }
 
 export default function ApiKeysPage() {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
-  const [emailStats, setEmailStats] = useState<EmailStats | null>(null)
-  const [newKeyName, setNewKeyName] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
-  const [showNewKeyDialog, setShowNewKeyDialog] = useState(false)
-  const [newlyCreatedKey, setNewlyCreatedKey] = useState<string>("")
-  const [refreshing, setRefreshing] = useState(false)
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newKeyName, setNewKeyName] = useState("");
+  const [isLoading, setisLoading] = useState("");
+  const [apiKeyValue, setApiKeyValue] = useState<{
+    keyName: string;
+    keyValue: string;
+  } | null>(null);
 
   useEffect(() => {
-    fetchData()
-  }, [])
-
-  const fetchData = async () => {
-    await Promise.all([fetchApiKeys(), fetchEmailStats()])
-  }
+    fetchApiKeys();
+  }, []);
 
   const fetchApiKeys = async () => {
     try {
-      const response = await fetch("/api/keys")
-      const data = await response.json()
-      if (response.ok) {
-        setApiKeys(data.apiKeys)
+      setisLoading("fetch");
+      const response = await fetch("/api/keys");
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setApiKeys(data.apiKeys.reverse());
       } else {
-        setError(data.error || "Failed to fetch API keys")
+        setError(data.error || "Failed to fetch API keys");
       }
-    } catch {
-      setError("Failed to fetch API keys")
-      console.error("Failed to fetch API keys")
+    } catch (error) {
+      setError("Failed to fetch API keys");
+      console.error("Failed to fetch API keys:", error);
+    } finally {
+      setisLoading("");
     }
-  }
-
-  const fetchEmailStats = async () => {
-    try {
-      const response = await fetch("/api/email-stats")
-      const data = await response.json()
-      if (response.ok) {
-        setEmailStats(data)
-      } else {
-        setError(data.error || "Failed to fetch email stats")
-      }
-    } catch {
-      setError("Failed to fetch email stats")
-      console.error("Failed to fetch email stats")
-    }
-  }
+  };
 
   const refreshData = async () => {
-    setRefreshing(true)
-    await fetchData()
-    setRefreshing(false)
-    setSuccess("Data refreshed!")
-    setTimeout(() => setSuccess(""), 2000)
-  }
+    setRefreshing(true);
+    await fetchApiKeys();
+    setRefreshing(false);
+    setSuccess("Data refreshed!");
+    setTimeout(() => setSuccess(""), 2000);
+  };
 
   const createApiKey = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newKeyName.trim()) return
+    e.preventDefault();
+    if (!newKeyName.trim()) return;
 
-    setLoading(true)
-    setError("")
-    setSuccess("")
+    setisLoading("create");
+    setError("");
+    setSuccess("");
 
     try {
       const response = await fetch("/api/keys", {
@@ -141,312 +107,400 @@ export default function ApiKeysPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ keyName: newKeyName }),
-      })
+      });
 
-      const data = await response.json()
-
-      if (data.success) {
-        setNewlyCreatedKey(data.apiKey.keyValue)
-        setShowNewKeyDialog(true)
-        setNewKeyName("")
-        fetchApiKeys()
+      const data = await response.json();
+      if (data?.success && data?.apiKey) {
+        setApiKeyValue(data?.apiKey);
+        setNewKeyName("");
+        setSuccess("API key created successfully!");
+        if (data?.apiKey?.keyValue)
+          copyToClipboard(data?.apiKey?.keyValue, "", false);
+        fetchApiKeys();
       } else {
-        setError(data.error)
+        setError(data.error || "Failed to create API key");
       }
     } catch {
-      setError("Failed to create API key")
+      setError("Failed to create API key");
     } finally {
-      setLoading(false)
+      setisLoading("");
     }
-  }
+  };
 
-  const deleteApiKey = async (keyId: string, keyName: string) => {
-    if (!confirm(`Are you sure you want to delete the API key "${keyName}"? This action cannot be undone.`)) {
-      return
-    }
+  useEffect(() => {
+    if (success || error) toast(success || error);
+  }, [success, error]);
 
-    try {
-      const response = await fetch(`/api/keys?id=${keyId}`, {
-        method: "DELETE",
-      })
+  const getStatusIcon = () => {
+    return (
+      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-green-200 hover:bg-green-300 dark:bg-green-900/40 dark:hover:bg-green-900/60 dark:text-green-500 text-green-900 flex items-center justify-center">
+        <Key className="w-3 h-3 sm:w-4 sm:h-4" />
+      </div>
+    );
+  };
 
-      if (response.ok) {
-        setSuccess("API key deleted successfully!")
-        fetchApiKeys()
-      } else {
-        const data = await response.json()
-        setError(data.error || "Failed to delete API key")
-      }
-    } catch {
-      setError("Failed to delete API key")
-    }
-  }
+  const getStatusBadge = () => {
+    return (
+      <Badge className="bg-green-200 hover:bg-green-300 dark:bg-green-900/40 dark:hover:bg-green-900/60 dark:text-green-500 text-green-900 text-xs">
+        Active
+      </Badge>
+    );
+  };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setSuccess("Copied to clipboard!")
-    setTimeout(() => setSuccess(""), 2000)
-  }
+  const getUsageText = (apiKey: ApiKey) => `${apiKey.stats.total} times`;
 
-  const getPlanColor = (plan: string) => {
-    switch (plan) {
-      case "free":
-        return "bg-gray-500"
-      case "starter":
-        return "bg-blue-500"
-      case "pro":
-        return "bg-purple-500"
-      case "premium":
-        return "bg-gold-500"
-      default:
-        return "bg-gray-500"
-    }
-  }
+  const filteredApiKeys = apiKeys.filter((apiKey) => {
+    const matchesSearch =
+      apiKey.keyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      apiKey.id.toLowerCase().includes(searchQuery.toLowerCase());
 
-  const getPlanName = (plan: string) => {
-    return plan.charAt(0).toUpperCase() + plan.slice(1)
-  }
+    return matchesSearch;
+  });
 
   return (
-    <div className="min-h-screen app-gradient overflow-y-auto">
-      <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex h-16 items-center px-6">
-          <SidebarTrigger />
-          <div className="flex items-center justify-between w-full ml-4">
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
-                API Keys
-              </h1>
-              <p className="text-muted-foreground text-sm">Manage your API keys and view usage statistics</p>
-            </div>
-            <div className="flex items-center gap-4">
-              {emailStats && (
-                <Badge
-                  className={`${getPlanColor(emailStats.subscription.plan)} hover:${getPlanColor(emailStats.subscription.plan)}`}
+    <div className="min-h-screen p-4 sm:p-6 lg:p-10 flex justify-center">
+      <div className="w-full max-w-7xl">
+        <div>
+          <div className="flex h-14 sm:h-16 items-center px-4 sm:px-6">
+            <div className="flex items-center justify-between w-full">
+              <div>
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold">
+                  API Keys
+                </h1>
+              </div>
+              <div className="flex items-center gap-2 sm:gap-4">
+                <Dialog
+                  open={showCreateDialog}
+                  onOpenChange={() => {
+                    setShowCreateDialog(!showCreateDialog);
+                    setApiKeyValue(null);
+                  }}
                 >
-                  <Crown className="w-3 h-3 mr-1" />
-                  {getPlanName(emailStats.subscription.plan)} Plan
-                </Badge>
-              )}
-              <Button onClick={refreshData} variant="outline" disabled={refreshing}>
-                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-                Refresh
-              </Button>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="grad"
+                      disabled={apiKeys.length >= 5}
+                      size="sm"
+                    >
+                      <Plus className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                      <span className="hidden sm:inline ">Create API Key</span>
+                      <span className="sm:hidden">Create</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent
+                    onPointerDownOutside={(e) => e.preventDefault()}
+                    onEscapeKeyDown={(e) => e.preventDefault()}
+                    className="bg-background border-border w-[95vw] max-w-md mx-auto"
+                  >
+                    <DialogHeader>
+                      <DialogTitle className="text-base sm:text-lg">
+                        {apiKeyValue?.keyName && apiKeyValue?.keyValue
+                          ? apiKeyValue?.keyName
+                          : "Add API Key"}
+                      </DialogTitle>
+                      {!apiKeyValue?.keyName && !apiKeyValue?.keyValue && (
+                        <DialogDescription className="text-sm">
+                          Create a new API key for your application
+                        </DialogDescription>
+                      )}
+                    </DialogHeader>
+                    {apiKeyValue?.keyName && apiKeyValue.keyValue ? (
+                      <>
+                        <div className="my-4 flex items-start gap-3 rounded-lg border text-sm border-yellow-400/40 bg-yellow-400/5 p-4 text-yellow-500">
+                          <AlertTriangle
+                            size={18}
+                            className="mt-0.5 flex-shrink-0"
+                          />
+                          <span className="text-xs sm:text-sm">
+                            Make sure to copy your API key now. You won&apos;t
+                            see it again.
+                          </span>
+                        </div>
+                        <div className="mb-4 rounded-md px-4 py-2 text-xs sm:text-sm font-mono text-muted-foreground truncate border break-all">
+                          {apiKeyValue?.keyValue}
+                        </div>
+                        <Button
+                          onClick={() =>
+                            copyToClipboard(apiKeyValue.keyValue, "API key")
+                          }
+                          className="flex items-center gap-2 text-sm w-full"
+                        >
+                          Copy
+                          <Copy size={14} />
+                        </Button>
+                      </>
+                    ) : (
+                      <form onSubmit={createApiKey} className="space-y-4">
+                        <div>
+                          <Label htmlFor="keyName" className="text-sm">
+                            Name
+                          </Label>
+                          <Input
+                            id="keyName"
+                            value={newKeyName}
+                            onChange={(e) => setNewKeyName(e.target.value)}
+                            placeholder="Your API Key name"
+                            required
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="flex gap-2 pt-4">
+                          <Button
+                            type="submit"
+                            disabled={isLoading == "create"}
+                            className="flex-1 text-sm"
+                          >
+                            {isLoading == "create" ? "Creating..." : "Add"}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowCreateDialog(false)}
+                            className="text-sm"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </form>
+                    )}
+                  </DialogContent>
+                </Dialog>
+
+                <Button
+                  onClick={refreshData}
+                  disabled={refreshing}
+                  variant="outline"
+                  className="custom-gradient bg-transparent"
+                  size="sm"
+                >
+                  <RefreshCw
+                    className={`w-3 h-3 sm:w-4 sm:h-4 ${
+                      refreshing ? "animate-spin" : ""
+                    }`}
+                  />
+                  <span className="hidden sm:inline ml-2">Refresh</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
-        {error && (
-          <Alert className="mb-6 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        {success && (
-          <Alert className="mb-6 border-green-500/50 text-green-600 dark:border-green-500 [&>svg]:text-green-600">
-            <AlertDescription>{success}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* Limit Warning */}
-        {emailStats && emailStats.limits.dailyRemaining <= 10 && (
-          <Alert className="mb-6 border-yellow-500/50 text-yellow-600 dark:border-yellow-500 [&>svg]:text-yellow-600">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Warning: You have only {emailStats.limits.dailyRemaining} emails remaining today.
-              {emailStats.subscription.plan === "free" && (
-                <Link href="/dashboard/billing" className="ml-2 underline">
-                  Upgrade your plan for higher limits.
-                </Link>
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {emailStats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card className="card-gradient">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Today&apos;s API Calls</p>
-                    <p className="text-3xl font-bold text-foreground">{emailStats.today.total}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {emailStats.today.sent} sent, {emailStats.today.failed} failed
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/25">
-                    <Clock className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-gradient">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Daily Remaining</p>
-                    <p className="text-3xl font-bold text-foreground">{emailStats.limits.dailyRemaining}</p>
-                    <p className="text-xs text-muted-foreground">out of {emailStats.limits.dailyLimit} daily limit</p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/25">
-                    <CheckCircle className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-gradient">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Total API Calls</p>
-                    <p className="text-3xl font-bold text-foreground">{emailStats.total.total}</p>
-                    <p className="text-xs text-muted-foreground">all time</p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
-                    <TrendingUp className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-gradient">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Success Rate</p>
-                    <p className="text-3xl font-bold text-foreground">
-                      {emailStats.total.total > 0
-                        ? Math.round((emailStats.total.sent / emailStats.total.total) * 100)
-                        : 0}
-                      %
-                    </p>
-                    <p className="text-xs text-muted-foreground">API success rate</p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/25">
-                    <BarChart3 className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search API keys..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 custom-gradient2 text-sm"
+              />
+            </div>
           </div>
-        )}
 
-        <Card className="card-gradient mb-6">
-          <CardHeader>
-            <CardTitle>Create New API Key</CardTitle>
-            <CardDescription>
-              Generate a new API key to access the email service (Max 5 keys per account)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={createApiKey} className="flex gap-4">
-              <div>
-                <Label htmlFor="keyName">Key Name</Label>
-                <Input
-                  className="w-full"
-                  id="keyName"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                  placeholder="e.g., Production API Key"
-                  required
-                  disabled={apiKeys.length >= 5}
-                />
-              </div>
-              <Button variant="grad1" type="submit" disabled={loading || apiKeys.length >= 5} className="mt-6">
-                <Plus className="w-4 h-4 mr-2" />
-                {loading ? "Creating..." : "Create Key"}
-              </Button>
-            </form>
-            {apiKeys.length >= 5 && (
-              <p className="text-sm text-muted-foreground mt-2">
-                You have reached the maximum limit of 5 API keys. Delete an existing key to create a new one.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="card-gradient">
-          <CardHeader>
-            <CardTitle>Your API Keys ({apiKeys.length}/5)</CardTitle>
-            <CardDescription>Manage your existing API keys and view their usage statistics</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {apiKeys.map((key) => (
-                <div key={key.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-medium text-foreground">{key.keyName}</h3>
-                      <Badge className="bg-green-600 hover:bg-green-700">Active</Badge>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Total Calls</p>
-                        <p className="font-semibold text-foreground">{key.stats.total}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Success Rate</p>
-                        <p className="font-semibold text-green-400">
-                          {key.stats.total > 0 ? Math.round((key.stats.sent / key.stats.total) * 100) : 0}%
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Today&apos;s Calls</p>
-                        <p className="font-semibold text-foreground">{key.stats.today.total}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Last Used</p>
-                        <p className="font-semibold text-foreground">
-                          {key.lastUsed ? new Date(key.lastUsed).toLocaleDateString() : "Never"}
-                        </p>
+          <div className="hidden lg:block rounded-lg border overflow-hidden">
+            <div className="hidden lg:grid grid-cols-12 gap-4 px-4 py-2 border-b text-muted-foreground text-sm font-bold custom-gradient2 hover:bg-transparent">
+              <div className="col-span-4">Name</div>
+              <div className="col-span-2">Status</div>
+              <div className="col-span-2">Usage</div>
+              <div className="col-span-2">Last Used</div>
+              <div className="col-span-2">Created</div>
+            </div>
+            <div className="divide-y">
+              {filteredApiKeys.length > 0 ? (
+                filteredApiKeys.map((apiKey) => (
+                  <div
+                    key={apiKey.id}
+                    className="grid grid-cols-12 items-center gap-4 px-4 py-3 text-foreground/90 text-sm transition-colors"
+                  >
+                    <div className="col-span-4 flex items-center gap-3">
+                      {getStatusIcon()}
+                      <div className="flex flex-col group min-w-0">
+                        <Link
+                          href={`/dashboard/api-keys/${apiKey.id}`}
+                          className="hover:underline underline-offset-2 group flex items-center gap-x-2"
+                        >
+                          <p className="font-medium flex items-center gap-2 group truncate text-left">
+                            {apiKey.keyName}
+                          </p>
+                          <ExternalLink
+                            className="group-hover:block hidden flex-shrink-0"
+                            size={14}
+                          />
+                        </Link>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Created: {new Date(key.createdAt).toLocaleDateString()}
-                    </p>
+                    <div className="col-span-2 flex items-center">
+                      {getStatusBadge()}
+                    </div>
+                    <div className="col-span-2 flex items-center gap-2">
+                      <span>{getUsageText(apiKey)}</span>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <span className="text-muted-foreground">
+                        {apiKey.lastUsed
+                          ? formatDistanceToNowStrict(
+                              new Date(apiKey.lastUsed),
+                              {
+                                addSuffix: true,
+                              }
+                            )
+                          : "Never"}
+                      </span>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <span className="text-muted-foreground">
+                        {formatDistanceToNowStrict(new Date(apiKey.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="destructive" onClick={() => deleteApiKey(key.id, key.keyName)}>
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
+                ))
+              ) : isLoading ? (
+                <div className=" space-y-1">
+                  <div className=" h-12 bg-muted/40 animate-pulse"></div>
+                  <div className=" h-12  bg-muted/20 animate-pulse"></div>
+                  <div className=" h-12 bg-muted/40  animate-pulse"></div>
+                  <div className=" h-12 bg-muted/20 animate-pulse"></div>
+                  <div className=" h-12 bg-muted/40  animate-pulse"></div>
+                  <div className=" h-12 bg-muted/20 animate-pulse"></div>
                 </div>
-              ))}
-              {apiKeys.length === 0 && (
+              ) : (
                 <div className="text-center py-12">
-                  <Key className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground text-lg mb-2">No API keys created yet</p>
-                  <p className="text-muted-foreground text-sm">Create your first API key above to get started</p>
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                    <Key className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground text-lg mb-2">
+                    {searchQuery
+                      ? "No API keys match your search"
+                      : "No API keys created yet"}
+                  </p>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    {searchQuery
+                      ? "Try adjusting your search criteria"
+                      : "Create your first API key to get started"}
+                  </p>
+                  {!searchQuery && (
+                    <Button
+                      className="custom-gradient"
+                      onClick={() => setShowCreateDialog(true)}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Your First API Key
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Dialog open={showNewKeyDialog} onOpenChange={setShowNewKeyDialog}>
-        <DialogContent className="bg-background border-border">
-          <DialogHeader>
-            <DialogTitle className="text-foreground">API Key Created Successfully!</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Please copy your API key now. You won&apos;t be able to see it again.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <code className="text-sm break-all text-foreground">{newlyCreatedKey}</code>
-            </div>
-            <Button onClick={() => copyToClipboard(newlyCreatedKey)} className="w-full">
-              <Copy className="w-4 h-4 mr-2" />
-              Copy to Clipboard
-            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+
+          <div className="lg:hidden space-y-4">
+            {filteredApiKeys.length > 0 ? (
+              filteredApiKeys.map((apiKey) => (
+                <Card
+                  key={apiKey.id}
+                  className="hover:shadow-md transition-shadow"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        {getStatusIcon()}
+                        <div className="min-w-0 flex-1">
+                          <Link
+                            href={`/dashboard/api-keys/${apiKey.id}`}
+                            className="block group"
+                          >
+                            <CardTitle className="text-base sm:text-lg font-medium group-hover:underline truncate flex items-center gap-2">
+                              {apiKey.keyName}
+                              <ExternalLink className="w-4 h-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </CardTitle>
+                          </Link>
+                          <div className="flex items-center gap-2 mt-1">
+                            {getStatusBadge()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span>Usage</span>
+                        </div>
+                        <p className="font-medium">{getUsageText(apiKey)}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span>Last Used</span>
+                        </div>
+                        <p className="font-medium">
+                          {apiKey.lastUsed
+                            ? formatDistanceToNowStrict(
+                                new Date(apiKey.lastUsed),
+                                {
+                                  addSuffix: true,
+                                }
+                              )
+                            : "Never"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-4 ">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>
+                          Created{" "}
+                          {formatDistanceToNowStrict(
+                            new Date(apiKey.createdAt),
+                            {
+                              addSuffix: true,
+                            }
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : isLoading ? (
+              <div className=" space-y-3">
+                <div className=" h-24 bg-muted/40 animate-pulse"></div>
+                <div className=" h-24  bg-muted/20 animate-pulse"></div>
+                <div className=" h-24 bg-muted/40  animate-pulse"></div>
+                <div className=" h-24 bg-muted/20 animate-pulse"></div>
+                <div className=" h-24 bg-muted/40  animate-pulse"></div>
+                <div className=" h-24 bg-muted/20 animate-pulse"></div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <Key className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground text-lg mb-2">
+                  {searchQuery
+                    ? "No API keys match your search"
+                    : "No API keys created yet"}
+                </p>
+                <p className="text-muted-foreground text-sm mb-4">
+                  {searchQuery
+                    ? "Try adjusting your search criteria"
+                    : "Create your first API key to get started"}
+                </p>
+                {!searchQuery && (
+                  <Button
+                    className="custom-gradient"
+                    onClick={() => setShowCreateDialog(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Your First API Key
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

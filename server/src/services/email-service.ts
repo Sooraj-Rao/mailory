@@ -1,5 +1,6 @@
 import { getSESClient } from "../config/aws";
 import { logger } from "../utils/logger";
+import User from "../models/user";
 import type AWS from "aws-sdk";
 
 export interface EmailParams {
@@ -8,6 +9,8 @@ export interface EmailParams {
   text?: string;
   html?: string;
   from?: string;
+  userId?: string;
+  apiKeyId?: string;
 }
 
 export class EmailService {
@@ -30,12 +33,12 @@ export class EmailService {
       throw new Error("AWS SES is not configured");
     }
 
-    const { to, subject, text, html, from } = params;
+    const { to, subject, text, html, from, userId, apiKeyId } = params;
     const recipients = Array.isArray(to) ? to : [to];
 
     const sesParams = {
-      Source: `"${from || "Emailer"}" <${
-        process.env.DEFAULT_FROM_EMAIL || "no-reply@email.soorajrao.in"
+      Source: `"${from || "Mailory"}" <${
+        process.env.DEFAULT_FROM_EMAIL || "service@email.mailory.site"
       }>`,
       Destination: { ToAddresses: recipients },
       Message: {
@@ -55,7 +58,16 @@ export class EmailService {
         messageId: result.MessageId,
         to: recipients,
         subject,
+        userId,
+        apiKeyId,
       });
+
+      if (userId) {
+        await this.updateUserEmailCount(userId);
+        logger.info(
+          `📈 Updated quota for user ${userId} after transactional email send`
+        );
+      }
 
       return { MessageId: result.MessageId || "unknown" };
     } catch (error: any) {
@@ -64,8 +76,36 @@ export class EmailService {
         error: error.message,
         to: recipients,
         subject,
+        userId,
+        apiKeyId,
       });
       throw new Error(error.message);
+    }
+  }
+
+  private async updateUserEmailCount(userId: string): Promise<void> {
+    try {
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          $inc: {
+            "emailLimits.dailyUsed": 1,
+            "emailLimits.monthlyUsed": 1,
+          },
+        },
+        { new: true }
+      ).exec();
+
+      if (updatedUser) {
+        logger.info(
+          `📈 Updated email count for user ${userId} - Daily: ${updatedUser.emailLimits.dailyUsed}/${updatedUser.emailLimits.dailyLimit}, Monthly: ${updatedUser.emailLimits.monthlyUsed}/${updatedUser.emailLimits.monthlyLimit}`
+        );
+      } else {
+        logger.warn(`⚠️ User ${userId} not found when updating email count`);
+      }
+    } catch (error) {
+      logger.error(`❌ Error updating user email count for ${userId}:`, error);
+      throw error;
     }
   }
 
@@ -98,3 +138,5 @@ export class EmailService {
     return this.sesClient !== null;
   }
 }
+
+

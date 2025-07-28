@@ -30,12 +30,10 @@ export const logger = winston.createLogger({
   format: logFormat,
   defaultMeta: { service: "email-worker" },
   transports: [
-    // Console transport
     new winston.transports.Console({
       format: consoleFormat,
     }),
 
-    // File transport for errors
     new DailyRotateFile({
       filename: "logs/error-%DATE%.log",
       datePattern: "YYYY-MM-DD",
@@ -44,7 +42,6 @@ export const logger = winston.createLogger({
       maxFiles: "14d",
     }),
 
-    // File transport for all logs
     new DailyRotateFile({
       filename: "logs/combined-%DATE%.log",
       datePattern: "YYYY-MM-DD",
@@ -54,12 +51,10 @@ export const logger = winston.createLogger({
   ],
 });
 
-// Handle uncaught exceptions
 logger.exceptions.handle(
   new winston.transports.File({ filename: "logs/exceptions.log" })
 );
 
-// Handle unhandled promise rejections
 logger.rejections.handle(
   new winston.transports.File({ filename: "logs/rejections.log" })
 );

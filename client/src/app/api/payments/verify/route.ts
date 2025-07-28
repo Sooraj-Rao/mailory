@@ -47,9 +47,7 @@ export async function POST(request: NextRequest) {
     const plan = getPlanLimits(planId);
     const now = new Date();
     const endDate = new Date();
-    endDate.setMonth(endDate.getMonth() + 1); // 1 month subscription
-
-    // Update user subscription
+    endDate.setMonth(endDate.getMonth() + 1);
     user.subscription = {
       plan: planId,
       status: "active",
@@ -59,7 +57,6 @@ export async function POST(request: NextRequest) {
       razorpayCustomerId: user.subscription.razorpayCustomerId,
     };
 
-    // Update email limits based on plan
     user.emailLimits = {
       dailyLimit: plan.dailyLimit,
       monthlyLimit: plan.monthlyLimit,

@@ -14,7 +14,7 @@ export const copyToClipboard = async (
 
   try {
     await navigator.clipboard.writeText(text);
-    if (showToast) return toast(`${title} copied to clipboard!`);
+    if (showToast) return toast(`${title ? title : ""} Copied to clipboard!`);
   } catch {
     if (showToast) return toast("Failed to copy text to clipboard");
   }

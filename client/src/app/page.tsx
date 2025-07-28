@@ -2,12 +2,16 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Features from "@/components/home/features";
-import Footer from "@/components/home/footer";
-import Header from "@/components/home/header";
-import Hero from "@/components/home/hero";
-import Pricing from "@/components/home/pricing";
 import { useUser } from "@/hooks/user/auth-user";
+
+import Header from "@/components/home/header";
+import HeroSection from "@/components/landing/hero-section";
+import FeaturesSection from "@/components/landing/feature-section";
+import PricingSection from "@/components/landing/pricing-section";
+import TestimonialsSection from "@/components/landing/testimonials-section";
+import CTASection from "@/components/landing/cta-section";
+import FooterSection from "@/components/landing/footer-section";
+import Landing from "@/components/home/landing";
 
 export default function HomePage() {
   const router = useRouter();
@@ -18,25 +22,19 @@ export default function HomePage() {
       router.push("/dashboard/emails");
       return;
     }
-  }, [userData]);
+  }, [userData, router]);
 
-  if (!router) {
+  if (userData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+        <div className="text-white">Redirecting to dashboard...</div>
       </div>
     );
   }
 
   return (
-    <>
-      <div className="min-h-screen ">
-        <Header />
-        <Hero />
-        <Features />
-        <Pricing />
-        <Footer />
-      </div>
-    </>
+    <div className="min-h-screen bg-background">
+      <Landing />
+    </div>
   );
 }

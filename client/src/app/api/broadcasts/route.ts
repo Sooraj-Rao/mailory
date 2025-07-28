@@ -22,46 +22,18 @@ export async function POST(request: NextRequest) {
     }
 
     const { recipients, subject, html, text, from } = await request.json();
-
-    if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+    const isErrorValidation = validateRequest(
+      recipients,
+      subject,
+      from,
+      text,
+      html
+    );
+    if (isErrorValidation) {
       return setCorsHeaders(
-        NextResponse.json(
-          { error: "Recipients array is required" },
-          { status: 400 }
-        )
+        NextResponse.json({ error: isErrorValidation }, { status: 400 })
       );
     }
-
-    if (recipients.length > 100) {
-      return setCorsHeaders(
-        NextResponse.json(
-          { error: "Maximum 100 recipients allowed per batch" },
-          { status: 400 }
-        )
-      );
-    }
-
-    if (!subject || !html) {
-      return setCorsHeaders(
-        NextResponse.json(
-          { error: "Subject and HTML content are required" },
-          { status: 400 }
-        )
-      );
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    for (const email of recipients) {
-      if (!emailRegex.test(email)) {
-        return setCorsHeaders(
-          NextResponse.json(
-            { error: `Invalid email format: ${email}` },
-            { status: 400 }
-          )
-        );
-      }
-    }
-
     await connectDB();
 
     const { allowed, limits, dailyCount, monthlyCount } = await checkRateLimit(
@@ -82,7 +54,7 @@ export async function POST(request: NextRequest) {
       subject,
       html,
       text,
-      from: from || "SendMailr",
+      from: from || "Mailory",
       batchId,
       status: "pending",
     }));
@@ -113,3 +85,45 @@ export async function POST(request: NextRequest) {
 export function OPTIONS() {
   return handleCorsOptions();
 }
+
+const validateRequest = (
+  recipients: string[],
+  subject: string,
+  from: string,
+  text: string,
+  html: string
+) => {
+  if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+    return "Recipients array is required";
+  }
+
+  if (recipients.length > 100) {
+    return "Maximum 100 recipients allowed per batch";
+  }
+
+  const fields = [
+    { name: "subject", value: subject, error: "Subject is required" },
+    { name: "from", value: from, error: "From is required" },
+    {
+      name: "text or html",
+      value: text || html,
+      error: "Text content or HTML content are required",
+    },
+  ];
+
+  for (const field of fields) {
+    console.log(field);
+    if (!field.value) {
+      return field.error;
+    }
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  for (const email of recipients) {
+    if (!emailRegex.test(email)) {
+      return `Invalid email format: ${email}`;
+    }
+  }
+
+  return false;
+};

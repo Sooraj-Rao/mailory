@@ -9,7 +9,8 @@ import {
 } from "@/lib/api-auth";
 import connectDB from "@/lib/mongodb";
 import EmailLog from "@/models/EmailLog";
-import User from "@/models/User";
+import { extractFromField } from "../helper/email-name-extract";
+import { Domain } from "@/models/Domain";
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,12 +66,19 @@ export async function POST(request: NextRequest) {
     }
 
     await connectDB();
+    const { domain, name } = extractFromField(from);
+    if (domain) {
+      const isValid = await Domain.findOne({ domain, dkimStatus: "verified" });
+      if (isValid) {
+        NextResponse.json({ error: "Invalid domain." }, { status: 400 });
+      }
+    }
 
     const emailLog = new EmailLog({
       userId,
       apiKeyId: apiKey._id,
       to: Array.isArray(to) ? to.join(", ") : to,
-      from: from || "EmailService",
+      from: domain ? from : name,
       subject,
       status: "queued",
     });
@@ -82,7 +90,15 @@ export async function POST(request: NextRequest) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ to, subject, text, html, from }),
+        body: JSON.stringify({
+          to,
+          subject,
+          text,
+          html,
+          from: domain ? from : name,
+          apiKeyId: apiKey._id,
+          userId: userId._id,
+        }),
       });
 
       const result = await response.json();
@@ -98,14 +114,6 @@ export async function POST(request: NextRequest) {
 
       await emailLog.save();
 
-      // Increment user's email count
-      await User.findByIdAndUpdate(userId, {
-        $inc: {
-          "emailLimits.dailyUsed": 1,
-          "emailLimits.monthlyUsed": 1,
-        },
-      });
-
       return setCorsHeaders(
         NextResponse.json(
           { success: true, messageId: result.messageId },
@@ -116,14 +124,6 @@ export async function POST(request: NextRequest) {
       emailLog.status = "failed";
       emailLog.error = emailError.message;
       await emailLog.save();
-
-      // Still increment the count for failed emails (they count towards the limit)
-      await User.findByIdAndUpdate(userId, {
-        $inc: {
-          "emailLimits.dailyUsed": 1,
-          "emailLimits.monthlyUsed": 1,
-        },
-      });
 
       console.error("Email sending error:", emailError);
       return setCorsHeaders(

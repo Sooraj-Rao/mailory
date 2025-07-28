@@ -19,7 +19,6 @@ export async function validateApiKey(request: NextRequest) {
       return { isValid: false, apiKey: null, userId: null }
     }
 
-    // Update last used timestamp
     await ApiKey.findByIdAndUpdate(apiKey._id, { lastUsed: new Date() })
 
     return {
@@ -47,7 +46,6 @@ export async function checkRateLimit(userId: string) {
       }
     }
 
-    // Reset counters if needed
     const now = new Date()
     const lastReset = new Date(user.emailLimits.lastResetDate)
     const daysSinceReset = Math.floor((now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24))
@@ -55,28 +53,23 @@ export async function checkRateLimit(userId: string) {
     let dailyUsed = user.emailLimits.dailyUsed
     let monthlyUsed = user.emailLimits.monthlyUsed
 
-    // Reset daily counter if it's a new day
     if (daysSinceReset >= 1) {
       dailyUsed = 0
     }
 
-    // Reset monthly counter if it's been 30+ days
     if (daysSinceReset >= 30) {
       monthlyUsed = 0
-      // Update the reset date
       await User.findByIdAndUpdate(userId, {
         "emailLimits.dailyUsed": 0,
         "emailLimits.monthlyUsed": 0,
         "emailLimits.lastResetDate": now,
       })
     } else if (daysSinceReset >= 1) {
-      // Just reset daily
       await User.findByIdAndUpdate(userId, {
         "emailLimits.dailyUsed": 0,
       })
     }
 
-    // Check if user has exceeded limits
     const dailyAllowed = dailyUsed < user.emailLimits.dailyLimit
     const monthlyAllowed = monthlyUsed < user.emailLimits.monthlyLimit
 

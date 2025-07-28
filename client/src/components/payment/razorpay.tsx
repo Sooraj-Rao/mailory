@@ -45,7 +45,7 @@ export async function createSubscription({
       plan_id: planId,
       // customer_id: customerId,
       quantity: 1,
-      total_count: 12, // 12 months
+      total_count: 12, 
       addons: [],
       notes: {
         email: customerEmail,

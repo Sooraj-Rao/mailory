@@ -1,27 +1,33 @@
-import mongoose, { type Document, Schema } from "mongoose"
+import mongoose, { type Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
-  email: string
-  password: string
-  name: string
-  isVerified: boolean
+  email: string;
+  password: string;
+  name: string;
+  isVerified: boolean;
   subscription: {
-    plan: "free" | "starter" | "pro" | "premium"
-    status: "active" | "inactive" | "cancelled" | "expired"
-    startDate?: Date
-    endDate?: Date
-    razorpaySubscriptionId?: string
-    razorpayCustomerId?: string
-  }
+    plan: "free" | "pro" | "premium";
+    status: "active" | "inactive" | "cancelled" | "expired";
+    startDate?: Date;
+    endDate?: Date;
+    razorpaySubscriptionId?: string;
+    razorpayCustomerId?: string;
+  };
   emailLimits: {
-    dailyLimit: number
-    monthlyLimit: number
-    dailyUsed: number
-    monthlyUsed: number
-    lastResetDate: Date
-  }
-  createdAt: Date
-  updatedAt: Date
+    dailyLimit: number;
+    monthlyLimit: number;
+    dailyUsed: number;
+    monthlyUsed: number;
+    lastResetDate: Date;
+  };
+  preferences: {
+    emailNotifications: boolean;
+    marketingEmails: boolean;
+    securityAlerts: boolean;
+  };
+  domain?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -44,10 +50,13 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    domain:{
+      type:String
+    },
     subscription: {
       plan: {
         type: String,
-        enum: ["free", "starter", "pro", "premium"],
+        enum: ["free", "pro", "premium"],
         default: "free",
       },
       status: {
@@ -63,11 +72,11 @@ const UserSchema = new Schema<IUser>(
     emailLimits: {
       dailyLimit: {
         type: Number,
-        default: 100, 
+        default: 100,
       },
       monthlyLimit: {
         type: Number,
-        default: 3000, 
+        default: 3000,
       },
       dailyUsed: {
         type: Number,
@@ -82,10 +91,25 @@ const UserSchema = new Schema<IUser>(
         default: Date.now,
       },
     },
+    preferences: {
+      emailNotifications: {
+        type: Boolean,
+        default: true,
+      },
+      marketingEmails: {
+        type: Boolean,
+        default: false,
+      },
+      securityAlerts: {
+        type: Boolean,
+        default: true,
+      },
+    },
   },
   {
     timestamps: true,
-  },
-)
+  }
+);
 
-export default mongoose.models.User || mongoose.model<IUser>("User", UserSchema)
+export default mongoose.models.User ||
+  mongoose.model<IUser>("User", UserSchema);

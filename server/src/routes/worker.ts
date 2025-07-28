@@ -4,7 +4,6 @@ import { logger } from "../utils/logger"
 
 const router = Router()
 
-// Get worker status
 router.get("/status", (req: Request, res: Response) => {
   const worker = EmailWorker.getInstance()
   const status = worker.getStatus()
@@ -16,7 +15,6 @@ router.get("/status", (req: Request, res: Response) => {
   })
 })
 
-// Start worker
 router.post("/start", (req: Request, res: Response) => {
   try {
     const worker = EmailWorker.getInstance()
@@ -37,7 +35,6 @@ router.post("/start", (req: Request, res: Response) => {
   }
 })
 
-// Stop worker
 router.post("/stop", (req: Request, res: Response) => {
   try {
     const worker = EmailWorker.getInstance()
@@ -58,12 +55,10 @@ router.post("/stop", (req: Request, res: Response) => {
   }
 })
 
-// Trigger immediate processing
 router.post("/process", async (req: Request, res: Response) => {
   try {
     const worker = EmailWorker.getInstance()
 
-    // Process emails immediately (don't wait for cron)
     worker.processEmails().catch((error) => {
       logger.error("Error in immediate processing:", error)
     })

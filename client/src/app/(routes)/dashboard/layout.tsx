@@ -38,9 +38,8 @@ export default function DashboardLayout({
         onToggle={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      {/* Main content area with proper margin for sidebar */}
-      <div className="md:ml-60">
-        <DashboardHeader />
+      <div className="md:ml-64">
+        <DashboardHeader onToggle={() => setSidebarOpen(!sidebarOpen)} />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>

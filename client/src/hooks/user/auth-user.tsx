@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 
 export const useUser = () => {
   const { userData, setUserData } = useZustandStore();
-  const [userDataLoading, setUserDataLoading] = useState(false);
+  const [userDataLoading, setUserDataLoading] = useState(true);
 
   const fetchData = async () => {
     try {
-      setUserDataLoading(true);
+
       const res = await fetch("/api/auth/me");
       const data = await res.json();
       setUserData(data.user);

@@ -180,13 +180,13 @@ export default function BroadcastDetailsPage() {
 
   if (error || !broadcast) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-center">
-        <AlertTriangle className="w-6 h-6 text-destructive mb-2" />
+      <div className="min-h-screen flex items-center justify-center text-center p-4">
         <div>
-          <p className="text-red-500">{error || "Broadcast not found"}</p>
+          <AlertTriangle className="w-6 h-6 text-destructive mb-2 mx-auto" />
+          <p className="text-red-500 mb-4">{error || "Broadcast not found"}</p>
           <Button
             onClick={() => router.push("/dashboard/broadcasts")}
-            className="mt-4"
+            variant="outline"
           >
             Back to Broadcasts
           </Button>
@@ -197,44 +197,51 @@ export default function BroadcastDetailsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-30 bg-background border-b px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4 text-sm">
+      <div className="sticky top-0 z-30 bg-background border-b px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-4 text-sm min-w-0">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <Mail className="w-4 h-4 text-muted-foreground" />
-          <span className="font-medium">
+          <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <span className="font-medium truncate">
             {broadcast.subject || `Broadcast ${broadcast.batchId.slice(0, 8)}`}
           </span>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>
+          <span className="hidden sm:inline">
             {broadcast.stats.sent} sent / {getTotalEmails()} total
           </span>
-          <Button size="sm" onClick={refreshData} disabled={refreshing}>
+          <Button
+            variant="outline"
+            className="custom-gradient bg-transparent"
+            size="sm"
+            onClick={refreshData}
+            disabled={refreshing}
+          >
             <RefreshCw
               className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
             />
+            Refresh
           </Button>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-6 space-y-6">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Panel */}
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Campaign Overview</CardTitle>
-                <CardDescription>{broadcast.previewText}</CardDescription>
+                <CardDescription className="line-clamp-2">
+                  {broadcast.previewText}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                   {["sent", "failed", "pending", "processing"].map((status) => (
-                    <div key={status} className="border rounded p-2">
+                    <div key={status} className="border rounded p-3">
                       <div
-                        className={`text-xl font-bold ${
+                        className={`text-lg sm:text-xl font-bold ${
                           status === "sent"
                             ? "text-green-600"
                             : status === "failed"
@@ -246,7 +253,7 @@ export default function BroadcastDetailsPage() {
                       >
                         {broadcast.stats[status as keyof BroadcastStats]}
                       </div>
-                      <div className="text-sm capitalize text-muted-foreground">
+                      <div className="text-xs sm:text-sm capitalize text-muted-foreground">
                         {status}
                       </div>
                     </div>
@@ -260,14 +267,13 @@ export default function BroadcastDetailsPage() {
               </CardContent>
             </Card>
 
-            {/* HTML Content Preview */}
             {broadcast.htmlContent && (
-              <Card>
+              <Card className="hidden lg:block">
                 <CardHeader>
                   <CardTitle>Email Content</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm max-w-none bg-muted/30 p-4 rounded">
+                  <div className="prose prose-sm max-w-none bg-muted/30 p-4 rounded max-h-96 overflow-y-auto">
                     <div
                       dangerouslySetInnerHTML={{
                         __html: broadcast.htmlContent,
@@ -279,7 +285,6 @@ export default function BroadcastDetailsPage() {
             )}
           </div>
 
-          {/* Sidebar Info */}
           <div className="space-y-4">
             <Card>
               <CardHeader>
@@ -288,11 +293,13 @@ export default function BroadcastDetailsPage() {
               <CardContent className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">From:</span>
-                  <span>{broadcast.from}</span>
+                  <span className="truncate max-w-[120px]">
+                    {broadcast.from}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subject:</span>
-                  <span className="truncate max-w-[160px]">
+                  <span className="truncate max-w-[120px]">
                     {broadcast.subject}
                   </span>
                 </div>
@@ -303,7 +310,7 @@ export default function BroadcastDetailsPage() {
                 {broadcast.createdAt && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Created:</span>
-                    <span>
+                    <span className="text-xs">
                       {formatDistanceToNowStrict(
                         new Date(broadcast.createdAt),
                         {
@@ -316,7 +323,7 @@ export default function BroadcastDetailsPage() {
                 {broadcast.sentAt && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Sent:</span>
-                    <span>
+                    <span className="text-xs">
                       {formatDistanceToNowStrict(new Date(broadcast.sentAt), {
                         addSuffix: true,
                       })}
@@ -328,13 +335,12 @@ export default function BroadcastDetailsPage() {
           </div>
         </div>
 
-        {/* Email Logs Table */}
         <Card>
           <CardHeader>
             <CardTitle>Email Logs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col md:flex-row  items-center justify-between gap-4 mb-4">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mb-4">
               <Input
                 placeholder="Search by recipient email..."
                 value={searchQuery}
@@ -342,7 +348,7 @@ export default function BroadcastDetailsPage() {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full md:w-1/3"
+                className="w-full lg:w-1/3"
               />
               <Tabs
                 defaultValue="all"
@@ -352,10 +358,14 @@ export default function BroadcastDetailsPage() {
                   setCurrentPage(1);
                 }}
               >
-                <TabsList>
+                <TabsList className="grid grid-cols-5  w-full lg:w-auto ">
                   {["all", "sent", "failed", "pending", "processing"].map(
                     (status) => (
-                      <TabsTrigger key={status} value={status}>
+                      <TabsTrigger
+                        key={status}
+                        value={status}
+                        className="text-[10px] sm:text-xs px-1 sm:px-3 "
+                      >
                         {`${status.charAt(0).toUpperCase()}${status.slice(1)}`}
                       </TabsTrigger>
                     )
@@ -369,17 +379,17 @@ export default function BroadcastDetailsPage() {
                 paginatedEmails.map((email) => (
                   <div
                     key={email._id}
-                    className="flex items-center justify-between p-2 border rounded"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded gap-2"
                   >
-                    <div className="flex-1 truncate">
-                      <div className="font-medium">{email.to}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{email.to}</div>
                       {email.error && (
-                        <div className="text-xs text-red-600">
+                        <div className="text-xs text-red-600 mt-1">
                           {email.error}
                         </div>
                       )}
                       {email.processedAt && (
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-muted-foreground mt-1">
                           {formatDistanceToNowStrict(
                             new Date(email.processedAt),
                             { addSuffix: true }
@@ -387,10 +397,10 @@ export default function BroadcastDetailsPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col items-end">
+                    <div className="flex flex-col sm:items-end gap-1">
                       <Badge
                         variant={getStatusVariant(email.status)}
-                        className="text-xs capitalize"
+                        className="text-xs capitalize w-fit"
                       >
                         {email.status}
                       </Badge>
@@ -409,9 +419,8 @@ export default function BroadcastDetailsPage() {
               )}
             </div>
 
-            {/* Pagination */}
             {getFilteredEmails().length > 0 && (
-              <div className="flex justify-end gap-7 items-center pt-4 border-t text-sm">
+              <div className="flex flex-col sm:flex-row justify-between items-center pt-4 border-t text-sm gap-4">
                 <span className="text-muted-foreground">
                   {fromPages}-{toPages} of {getFilteredEmails().length} emails
                 </span>
@@ -424,6 +433,9 @@ export default function BroadcastDetailsPage() {
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
+                  <span className="px-2">
+                    {currentPage} of {totalPages}
+                  </span>
                   <Button
                     size="sm"
                     variant="outline"

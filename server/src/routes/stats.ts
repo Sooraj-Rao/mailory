@@ -6,7 +6,6 @@ import { logger } from "../utils/logger";
 
 const router = Router();
 
-// Get overview statistics
 router.get("/overview", async (req: Request, res: Response) => {
   try {
     const [emailStats, userCount, sesQuota] = await Promise.all([
@@ -55,7 +54,6 @@ router.get("/overview", async (req: Request, res: Response) => {
   }
 });
 
-// Get hourly email statistics for the last 24 hours
 router.get("/hourly", async (req: Request, res: Response) => {
   try {
     const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -80,7 +78,6 @@ router.get("/hourly", async (req: Request, res: Response) => {
       },
     ]);
 
-    // Format data for frontend consumption
     const formattedStats = Array.from({ length: 24 }, (_, hour) => ({
       hour,
       pending: 0,
@@ -109,7 +106,6 @@ router.get("/hourly", async (req: Request, res: Response) => {
   }
 });
 
-// Get user-specific statistics
 router.get("/users/:userId", async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;

@@ -95,7 +95,7 @@ export default function RegisterPage() {
             Create Account
           </CardTitle>
           <CardDescription>
-            Join SendMailr and start sending emails today
+            Join Mailory and start sending emails today
           </CardDescription>
         </CardHeader>
         <CardContent>

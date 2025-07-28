@@ -40,7 +40,6 @@ import {
   Save,
   Eye,
 } from "lucide-react";
-import { SidebarTrigger } from "@/components/home/sidebar";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 
@@ -171,7 +170,6 @@ export default function BroadcastCreatePage() {
   };
 
   const sendTestEmail = async () => {
-    // Implementation for test email
     console.log("Sending test email...");
   };
 
@@ -307,7 +305,6 @@ export default function BroadcastCreatePage() {
     const newContent = textBefore + insertText + textAfter;
     setBroadcast((prev) => ({ ...prev, htmlContent: newContent }));
 
-    // Focus back to editor
     setTimeout(() => {
       editor.focus();
       editor.setSelectionRange(
@@ -323,11 +320,9 @@ export default function BroadcastCreatePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-4">
-            <SidebarTrigger />
             <Button
               variant="outline"
               size="sm"
@@ -376,7 +371,6 @@ export default function BroadcastCreatePage() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-4xl mx-auto p-6">
         {error && (
           <Alert className="mb-6 border-red-500/50 bg-red-500/10">
@@ -395,7 +389,6 @@ export default function BroadcastCreatePage() {
         )}
 
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          {/* Email Fields */}
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div className="space-y-4">
               <div>
@@ -581,7 +574,6 @@ export default function BroadcastCreatePage() {
             </div>
           </div>
 
-          {/* Content Editor */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -682,7 +674,6 @@ export default function BroadcastCreatePage() {
             />
           </div>
 
-          {/* Plain Text Version */}
           <div className="mt-6">
             <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Plain Text Version (Optional)

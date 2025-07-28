@@ -85,9 +85,27 @@
 
 
 .custom-gradient {
-  @apply bg-gradient-to-tr from-primary/10 to-primary/20 border border-primary/10 text-foreground shadow shadow-primary/10 hover:bg-primary/5 ;
+  @apply bg-gradient-to-tr from-primary/10 to-primary/20 border border-primary/10 text-foreground  hover:bg-primary/5 ;
 }
 
 .custom-gradient1 {
   @apply bg-gradient-to-tr from-primary/5 to-primary/10 border border-primary/10 text-foreground shadow shadow-primary/10;
+}
+
+.custom-gradient2 {
+  @apply bg-gradient-to-tr from-primary/[0.03] to-primary/5 border border-primary/10 text-foreground shadow shadow-primary/5 hover:bg-primary/[0.03] ;
+}
+.custom-gradient3 {
+  @apply bg-gradient-to-tr from-primary/[0.00] to-primary/[0.03] border border-primary/10 text-foreground shadow shadow-primary/5 hover:bg-primary/[0.03] ;
+}
+
+.custom-gradient4 {
+  @apply bg-gradient-to-tr from-primary/[0.00] to-primary/[0.03] border border-primary/10 text-foreground shadow shadow-primary/5 ;
+}
+.custom-gradient5 {
+  @apply bg-gradient-to-br from-primary/70 to-primary/20 ;
+}
+
+.custom-gradient_dropdown {
+  @apply bg-gradient-to-tr from-primary/[0.03] to-primary/5 border border-primary/10 text-foreground shadow shadow-primary/5  ;
 }

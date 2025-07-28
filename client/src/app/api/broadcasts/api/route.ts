@@ -20,45 +20,23 @@ export async function POST(request: NextRequest) {
 
     const { recipients, subject, html, text, from } = await request.json();
 
-    if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
-      return NextResponse.json(
-        { error: "Recipients array is required" },
-        { status: 400 }
-      );
-    }
-
-    if (recipients.length > 100) {
-      return NextResponse.json(
-        { error: "Maximum 100 recipients allowed per batch" },
-        { status: 400 }
-      );
-    }
-
-    if (!subject || !html) {
-      return NextResponse.json(
-        { error: "Subject and HTML content are required" },
-        { status: 400 }
-      );
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    for (const email of recipients) {
-      if (!emailRegex.test(email)) {
-        return NextResponse.json(
-          { error: `Invalid email format: ${email}` },
-          { status: 400 }
-        );
-      }
+    const isErrorValidation = validateRequest(
+      recipients,
+      subject,
+      from,
+      text,
+      html
+    );
+    if (isErrorValidation) {
+      return NextResponse.json({ error: isErrorValidation }, { status: 400 });
     }
 
     await connectDB();
 
-    // Check if user has enough emails remaining for this batch
     const { allowed, dailyCount, monthlyCount, limits } = await checkRateLimit(
       decoded.userId
     );
 
-    // Check if the batch size exceeds remaining daily limit
     const user = await User.findById(decoded.userId);
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -113,15 +91,6 @@ export async function POST(request: NextRequest) {
 
     await BatchEmail.insertMany(batchEmails);
 
-    // Increment user's email count for the entire batch
-    await User.findByIdAndUpdate(decoded.userId, {
-      $inc: {
-        "emailLimits.dailyUsed": recipients.length,
-        "emailLimits.monthlyUsed": recipients.length,
-      },
-    });
-
-    // Notify the Express worker server that new emails are available
     try {
       const workerUrl = process.env.EMAIL_WORKER_URL || "http://localhost:4000";
       await fetch(`${workerUrl}/api/v1/worker/process`, {
@@ -130,7 +99,6 @@ export async function POST(request: NextRequest) {
       });
     } catch (error) {
       console.warn("Failed to notify worker server:", error);
-      // Don't fail the request if worker notification fails
     }
 
     return NextResponse.json({
@@ -147,3 +115,45 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+const validateRequest = (
+  recipients: string[],
+  subject: string,
+  from: string,
+  text: string,
+  html: string
+) => {
+  if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+    return "Recipients array is required";
+  }
+
+  if (recipients.length > 100) {
+    return "Maximum 100 recipients allowed per batch";
+  }
+
+  const fields = [
+    { name: "subject", value: subject, error: "Subject is required" },
+    { name: "from", value: from, error: "From is required" },
+    {
+      name: "text or html",
+      value: text || html,
+      error: "Text content or HTML content are required",
+    },
+  ];
+
+  for (const field of fields) {
+    console.log(field);
+    if (!field.value) {
+      return field.error;
+    }
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  for (const email of recipients) {
+    if (!emailRegex.test(email)) {
+      return `Invalid email format: ${email}`;
+    }
+  }
+
+  return false;
+};

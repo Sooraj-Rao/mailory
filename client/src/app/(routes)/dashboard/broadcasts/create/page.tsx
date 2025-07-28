@@ -1,38 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import type React from "react";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import {
-  Send,
-  Upload,
-  FileText,
-  X,
-  Eye,
-  Code,
-  ArrowLeft,
-  Users,
-  Mail,
-  RefreshCw,
-} from "lucide-react";
+import { Send, Upload, FileText, X, Code, Mail, RefreshCw } from "lucide-react";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { SidebarTrigger } from "@/components/home/sidebar";
 
 export default function CreateBroadcastPage() {
   const [recipients, setRecipients] = useState("");
@@ -207,132 +188,52 @@ export default function CreateBroadcastPage() {
     .filter((email) => email.trim().length > 0).length;
 
   return (
-    <div className="min-h-screen m-10 flex justify-center">
-      <div className="w-[64rem]">
-        {/* Header */}
+    <div className="min-h-screen">
+      <div className="w-full max-w-7xl mx-auto">
         <div>
-          <div className="flex h-16 items-center px-6">
-            <SidebarTrigger />
-            <div className="flex items-center justify-between w-full">
+          <div className="flex h-16 items-center px-4 sm:px-6">
+            <div className="flex items-center justify-between w-full ml-4">
               <div className="flex items-center gap-4">
-                <Link href="/dashboard/broadcasts">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="custom-gradient bg-transparent"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Broadcasts
-                  </Button>
-                </Link>
                 <div>
-                  <h1 className="text-2xl font-bold">Create Broadcast</h1>
-                  <p className="text-muted-foreground text-sm">
-                    Campaign and bulk email service
-                  </p>
+                  <h1 className="text-xl sm:text-2xl font-bold">
+                    Create Broadcast
+                  </h1>
                 </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  className="custom-gradient bg-transparent"
-                >
-                  <Code className="w-4 h-4 mr-2" />
-                  API
-                </Button>
-                <Button
-                  variant="outline"
-                  className="custom-gradient bg-transparent"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Templates
-                </Button>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="p-6">
-          {/* Alerts */}
+        <div className="p-4 sm:p-6 space-y-6">
           {error && (
-            <Alert className="mb-6 border-red-500/50 bg-red-500/10">
+            <Alert className="border-red-500/50 bg-red-500/10">
               <AlertDescription className="text-red-400">
                 {error}
               </AlertDescription>
             </Alert>
           )}
+
           {success && (
-            <Alert className="mb-6 border-green-500/50 bg-green-500/10">
+            <Alert className="border-green-500/50 bg-green-500/10">
               <AlertDescription className="text-green-400">
                 {success}
               </AlertDescription>
             </Alert>
           )}
 
-          {/* Campaign Stats */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <Card className="custom-gradient1">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-200 hover:bg-blue-300 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 dark:text-blue-500 text-blue-900 flex items-center justify-center">
-                    <Users className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Recipients</p>
-                    <p className="text-xl font-bold">{recipientCount}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="custom-gradient1">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-green-200 hover:bg-green-300 dark:bg-green-900/40 dark:hover:bg-green-900/60 dark:text-green-500 text-green-900 flex items-center justify-center">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <Badge className="bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-900/40 dark:hover:bg-yellow-900/60 dark:text-yellow-500 text-yellow-900">
-                      Draft
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="custom-gradient1">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-200 hover:bg-purple-300 dark:bg-purple-900/40 dark:hover:bg-purple-900/60 dark:text-purple-500 text-purple-900 flex items-center justify-center">
-                    <FileText className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Content</p>
-                    <p className="text-xl font-bold">
-                      {html.length > 0 ? "Ready" : "Empty"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Form Section */}
-            <Card className="custom-gradient1">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <Card className="custom-gradient3 hover:bg-transparent">
               <CardHeader>
                 <CardTitle className="text-foreground">
                   Campaign Details
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  Configure your email campaign settings and content
-                </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="from" className="text-foreground">
-                        From Name (Optional)
+                        From*
                       </Label>
                       <Input
                         id="from"
@@ -340,7 +241,7 @@ export default function CreateBroadcastPage() {
                         onChange={(e) => setFrom(e.target.value)}
                         placeholder="Your Name or Company"
                         disabled={loading}
-                        className="custom-gradient1"
+                        className="custom-gradient3"
                       />
                     </div>
                     <div className="space-y-2">
@@ -354,21 +255,23 @@ export default function CreateBroadcastPage() {
                         placeholder="Email subject"
                         required
                         disabled={loading}
-                        className="custom-gradient1"
+                        className="custom-gradient3"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                       <Label htmlFor="recipients" className="text-foreground">
                         Recipients * (Max 100 per batch)
                       </Label>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {uploadedFileName && (
                           <div className="flex items-center gap-2 text-sm text-green-400">
                             <FileText className="w-4 h-4" />
-                            <span>{uploadedFileName}</span>
+                            <span className="truncate max-w-32">
+                              {uploadedFileName}
+                            </span>
                           </div>
                         )}
                         <Input
@@ -386,7 +289,7 @@ export default function CreateBroadcastPage() {
                             size="sm"
                             onClick={clearRecipients}
                             disabled={loading}
-                            className="custom-gradient bg-transparent"
+                            className="custom-gradient3 bg-transparent"
                           >
                             <X className="w-4 h-4 mr-2" />
                             Clear
@@ -398,14 +301,19 @@ export default function CreateBroadcastPage() {
                             size="sm"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={uploadingFile || loading}
-                            className="custom-gradient bg-transparent"
+                            className="custom-gradient3 bg-transparent"
                           >
                             <Upload
                               className={`w-4 h-4 mr-2 ${
                                 uploadingFile ? "animate-spin" : ""
                               }`}
                             />
-                            {uploadingFile ? "Processing..." : "Upload File"}
+                            <span className="hidden sm:inline">
+                              {uploadingFile ? "Processing..." : "Upload File"}
+                            </span>
+                            <span className="sm:hidden">
+                              {uploadingFile ? "..." : "Upload"}
+                            </span>
                           </Button>
                         )}
                       </div>
@@ -415,18 +323,17 @@ export default function CreateBroadcastPage() {
                       value={recipients}
                       onChange={(e) => setRecipients(e.target.value)}
                       placeholder="user1@example.com&#10;user2@example.com&#10;user3@example.com&#10;&#10;Or upload a CSV/Excel file"
-                      className="min-h-[120px] custom-gradient1"
+                      className="min-h-[120px] custom-gradient3"
                       required
                       disabled={loading || uploadingFile}
                     />
-                    <div className="flex justify-between text-sm text-muted-foreground">
+                    <div className="flex flex-col sm:flex-row sm:justify-between text-sm text-muted-foreground gap-1">
                       <span>{recipientCount} recipients</span>
                       <span className="text-xs">
                         Supports CSV and Excel files
                       </span>
                     </div>
                   </div>
-
                   <Tabs defaultValue="html" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 custom-gradient1">
                       <TabsTrigger value="html">HTML Content</TabsTrigger>
@@ -444,7 +351,7 @@ export default function CreateBroadcastPage() {
                           setPreviewMode("html");
                         }}
                         placeholder="<h1>Hello!</h1><p>Your HTML email content here...</p>"
-                        className="min-h-[200px] custom-gradient1 font-mono text-sm"
+                        className="min-h-[200px] custom-gradient3 font-mono text-sm"
                         required
                         disabled={loading}
                       />
@@ -461,45 +368,46 @@ export default function CreateBroadcastPage() {
                           setPreviewMode("text");
                         }}
                         placeholder="Plain text version of your email..."
-                        className="min-h-[200px] custom-gradient1"
+                        className="min-h-[200px] custom-gradient3 "
                         disabled={loading}
                       />
                     </TabsContent>
                   </Tabs>
 
                   <Button
+                    size="sm"
+                    variant="grad"
                     type="submit"
                     disabled={loading || uploadingFile}
-                    className="w-full custom-gradient"
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    {loading
-                      ? "Creating Campaign..."
-                      : "Create Broadcast Campaign"}
+                    <span className="hidden sm:inline">
+                      {loading
+                        ? "Creating Campaign..."
+                        : "Create Broadcast Campaign"}
+                    </span>
+                    <span className="sm:hidden">
+                      {loading ? "Creating..." : "Create Campaign"}
+                    </span>
                   </Button>
                 </form>
               </CardContent>
             </Card>
 
-            {/* Preview Section */}
-            <Card className="custom-gradient1">
+            <Card className="custom-gradient3 hover:bg-transparent">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
                     <CardTitle className="text-foreground flex items-center gap-2">
-                      <Eye className="w-5 h-5" />
-                      Live Preview
+                      Preview
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                      See how your email will look to recipients
-                    </CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button
                       variant={previewMode === "html" ? "default" : "outline"}
                       size="sm"
                       onClick={() => setPreviewMode("html")}
-                      className="custom-gradient bg-transparent"
+                      className="custom-gradient3 bg-transparent"
                     >
                       HTML
                     </Button>
@@ -507,7 +415,7 @@ export default function CreateBroadcastPage() {
                       variant={previewMode === "text" ? "default" : "outline"}
                       size="sm"
                       onClick={() => setPreviewMode("text")}
-                      className="custom-gradient bg-transparent"
+                      className="custom-gradient3 bg-transparent"
                     >
                       Text
                     </Button>
@@ -516,20 +424,21 @@ export default function CreateBroadcastPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Email Header Preview */}
-                  <div className="border rounded-lg p-4 custom-gradient1">
+                  <div className="border rounded-lg p-4 custom-gradient3 hover:bg-transparent">
                     <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
                         <span className="text-muted-foreground">From:</span>
-                        <span>{from || "Your Email"}</span>
+                        <span className="break-all">
+                          {from || "Your Email"}
+                        </span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
                         <span className="text-muted-foreground">Subject:</span>
-                        <span className="font-medium">
+                        <span className="font-medium break-all">
                           {subject || "Email Subject"}
                         </span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
                         <span className="text-muted-foreground">To:</span>
                         <span>
                           {recipientCount > 0
@@ -540,13 +449,12 @@ export default function CreateBroadcastPage() {
                     </div>
                   </div>
 
-                  {/* Content Preview */}
-                  <div className="border rounded-lg custom-gradient1 min-h-[300px]">
+                  <div className="border rounded-lg custom-gradient3 hover:bg-transparent min-h-[300px]">
                     {previewMode === "html" ? (
                       <div className="p-4">
                         {html ? (
                           <div
-                            className="prose prose-sm max-w-none dark:prose-invert"
+                            className="prose prose-sm max-w-none dark:prose-invert break-words"
                             dangerouslySetInnerHTML={{ __html: html }}
                           />
                         ) : (
@@ -564,7 +472,7 @@ export default function CreateBroadcastPage() {
                     ) : (
                       <div className="p-4">
                         {text ? (
-                          <pre className="whitespace-pre-wrap text-sm font-sans">
+                          <pre className="whitespace-pre-wrap text-sm font-sans break-words">
                             {text}
                           </pre>
                         ) : (
@@ -584,6 +492,23 @@ export default function CreateBroadcastPage() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="hidden flex flex-col gap-2">
+            <Button
+              variant="outline"
+              className="custom-gradient bg-transparent"
+            >
+              <Code className="w-4 h-4 mr-2" />
+              API Documentation
+            </Button>
+            <Button
+              variant="outline"
+              className="custom-gradient bg-transparent"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Email Templates
+            </Button>
           </div>
         </div>
       </div>

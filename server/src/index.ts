@@ -8,13 +8,11 @@ import { errorHandler } from "./middleware/errorHandler";
 import routes from "./routes";
 import { EmailWorker } from "./services/email-worker";
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
 app.use(helmet());
 app.use(
   cors({
@@ -27,7 +25,6 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
 app.get("/health", (req, res) => {
   res.json({
     status: "healthy",
@@ -37,13 +34,10 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Routes
 app.use("/api/v1", routes);
 
-// Error handling
 app.use(errorHandler);
 
-// 404 handler
 app.use("*", (req, res) => {
   res.status(404).json({
     error: "Route not found",
@@ -51,19 +45,15 @@ app.use("*", (req, res) => {
   });
 });
 
-// Start server
 async function startServer() {
   try {
-    // Connect to database
     await connectDB();
     logger.info("✅ Connected to MongoDB");
 
-    // Start email worker
     const emailWorker = EmailWorker.getInstance();
     emailWorker.start();
     logger.info("🚀 Email worker started");
 
-    // Start HTTP server
     app.listen(PORT, () => {
       logger.info(`🌟 Email Worker Server running on port ${PORT}`);
       logger.info(`📊 Health check: http://localhost:${PORT}/health`);
@@ -75,7 +65,6 @@ async function startServer() {
   }
 }
 
-// Graceful shutdown
 process.on("SIGTERM", () => {
   logger.info("🛑 SIGTERM received, shutting down gracefully");
   const emailWorker = EmailWorker.getInstance();

@@ -91,7 +91,7 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-bold text-foreground">
             Welcome Back
           </CardTitle>
-          <CardDescription>Sign in to your SendMailr account</CardDescription>
+          <CardDescription>Sign in to your Mailory account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

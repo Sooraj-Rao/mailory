@@ -27,7 +27,6 @@ export class EmailWorker {
       return;
     }
 
-    // Process emails every 30 seconds
     this.cronJob = cron.schedule("*/30 * * * * *", async () => {
       if (!this.isProcessing) {
         await this.processEmails();
@@ -53,7 +52,6 @@ export class EmailWorker {
     this.isProcessing = true;
 
     try {
-      // Get pending emails with priority ordering
       const pendingEmails = await BatchEmail.find({
         status: "pending",
         $or: [
@@ -62,20 +60,28 @@ export class EmailWorker {
         ],
       })
         .sort({ priority: -1, createdAt: 1 })
-        .limit(10)
+        .limit(100)
         .exec();
 
       if (pendingEmails.length === 0) {
         return;
       }
 
-      logger.info(`📧 Processing ${pendingEmails.length} emails`);
+      const emailsByUser = new Map<string, any[]>();
+      for (const email of pendingEmails) {
+        if (!emailsByUser.has(email.userId)) {
+          emailsByUser.set(email.userId, []);
+        }
+        emailsByUser.get(email.userId)!.push(email);
+      }
 
-      // Process emails in parallel with controlled concurrency
-      const promises = pendingEmails.map((email) => this.processEmail(email));
+      logger.info(`📧 Processing emails for ${emailsByUser.size} users`);
+
+      const promises = Array.from(emailsByUser.entries()).map(
+        ([userId, userEmails]) => this.processUserEmails(userId, userEmails)
+      );
       await Promise.allSettled(promises);
 
-      // Process retry emails
       await this.processRetryEmails();
     } catch (error) {
       logger.error("❌ Error in email processing:", error);
@@ -84,9 +90,48 @@ export class EmailWorker {
     }
   }
 
+  private async processUserEmails(
+    userId: string,
+    emails: any[]
+  ): Promise<void> {
+    try {
+      const user = await User.findById(userId).exec();
+      if (!user) {
+        logger.error(`❌ User not found: ${userId}`);
+        return;
+      }
+
+      const batchSize = this.getBatchSizeForPlan(user.subscription.plan);
+      const emailsToProcess = emails.slice(0, batchSize);
+
+      logger.info(
+        `📧 Processing ${emailsToProcess.length} emails for user ${userId} (${user.subscription.plan} plan - batch size: ${batchSize})`
+      );
+
+      const promises = emailsToProcess.map((email) => this.processEmail(email));
+      await Promise.allSettled(promises);
+    } catch (error) {
+      logger.error(`❌ Error processing emails for user ${userId}:`, error);
+    }
+  }
+
+  private getBatchSizeForPlan(plan: string): number {
+    switch (plan) {
+      case "free":
+        return 10;
+      case "starter":
+        return 15;
+      case "pro":
+        return 20;
+      case "premium":
+        return 25;
+      default:
+        return 10;
+    }
+  }
+
   private async processEmail(email: any): Promise<void> {
     try {
-      // Mark as processing
       const updatedEmail = await BatchEmail.findOneAndUpdate(
         { _id: email._id, status: "pending" },
         { status: "processing", attempts: email.attempts + 1 },
@@ -94,20 +139,23 @@ export class EmailWorker {
       ).exec();
 
       if (!updatedEmail) {
-        return; // Email was already processed by another worker
+        return;
       }
 
-      // Check user rate limits
+      await this.ensureUserLimits(email.userId);
+
       const canSend = await this.checkUserRateLimit(email.userId);
       if (!canSend) {
         await BatchEmail.findByIdAndUpdate(email._id, {
           status: "failed",
           error: "User rate limit exceeded",
         }).exec();
+        logger.warn(
+          `⚠️ Rate limit exceeded for user ${email.userId}, email to ${email.to} failed`
+        );
         return;
       }
 
-      // Send email
       const result = await this.emailService.sendEmail({
         to: email.to,
         subject: email.subject,
@@ -116,17 +164,15 @@ export class EmailWorker {
         from: email.from,
       });
 
-      // Mark as sent
       await BatchEmail.findByIdAndUpdate(email._id, {
         status: "sent",
         messageId: result.MessageId,
         processedAt: new Date(),
       }).exec();
 
-      // Update user email count
       await this.updateUserEmailCount(email.userId);
 
-      logger.info(`✅ Email sent to ${email.to}`);
+      logger.info(`✅ Email sent to ${email.to} for user ${email.userId}`);
     } catch (error: any) {
       await this.handleEmailError(email, error.message);
     }
@@ -140,18 +186,18 @@ export class EmailWorker {
     const attempts = email.attempts + 1;
 
     if (attempts >= maxAttempts) {
-      // Mark as permanently failed
       await BatchEmail.findByIdAndUpdate(email._id, {
         status: "failed",
         error: errorMessage,
       }).exec();
 
+      await this.updateUserEmailCount(email.userId);
+
       logger.error(
         `❌ Email to ${email.to} permanently failed after ${attempts} attempts: ${errorMessage}`
       );
     } else {
-      // Schedule for retry with exponential backoff
-      const retryDelay = Math.pow(2, attempts) * 5 * 60 * 1000; // 5min, 10min, 20min
+      const retryDelay = Math.pow(2, attempts) * 5 * 60 * 1000;
       const nextRetryAt = new Date(Date.now() + retryDelay);
 
       await BatchEmail.findByIdAndUpdate(email._id, {
@@ -173,47 +219,171 @@ export class EmailWorker {
       status: "pending",
       nextRetryAt: { $lte: new Date() },
     })
-      .limit(5)
+      .limit(50)
       .exec();
 
+    const retryEmailsByUser = new Map<string, any[]>();
     for (const email of retryEmails) {
-      await this.processEmail(email);
+      if (!retryEmailsByUser.has(email.userId)) {
+        retryEmailsByUser.set(email.userId, []);
+      }
+      retryEmailsByUser.get(email.userId)!.push(email);
     }
+
+    const promises = Array.from(retryEmailsByUser.entries()).map(
+      ([userId, userEmails]) => this.processUserEmails(userId, userEmails)
+    );
+    await Promise.allSettled(promises);
   }
 
   private async checkUserRateLimit(userId: string): Promise<boolean> {
     try {
+      await this.resetUserCountersIfNeeded(userId);
+
       const user = await User.findById(userId).exec();
       if (!user) {
+        logger.error(`❌ User not found: ${userId}`);
         return false;
       }
 
-      const now = new Date();
-      if (now > user.subscription.resetDate) {
-        // Reset monthly limit
-        await User.findByIdAndUpdate(userId, {
-          "subscription.emailsUsed": 0,
-          "subscription.resetDate": new Date(
-            now.getTime() + 30 * 24 * 60 * 60 * 1000
-          ),
-        }).exec();
-        return true;
+      logger.info(
+        `🔍 Checking rate limit for user ${userId} - Current: Daily ${user.emailLimits.dailyUsed}/${user.emailLimits.dailyLimit}, Monthly ${user.emailLimits.monthlyUsed}/${user.emailLimits.monthlyLimit}`
+      );
+
+      const dailyAllowed =
+        user.emailLimits.dailyUsed < user.emailLimits.dailyLimit;
+      const monthlyAllowed =
+        user.emailLimits.monthlyUsed < user.emailLimits.monthlyLimit;
+
+      if (!dailyAllowed) {
+        logger.warn(
+          `⚠️ Daily limit exceeded for user ${userId}: ${user.emailLimits.dailyUsed}/${user.emailLimits.dailyLimit}`
+        );
+      }
+      if (!monthlyAllowed) {
+        logger.warn(
+          `⚠️ Monthly limit exceeded for user ${userId}: ${user.emailLimits.monthlyUsed}/${user.emailLimits.monthlyLimit}`
+        );
       }
 
-      return user.subscription.emailsUsed < user.subscription.emailsLimit;
+      return dailyAllowed && monthlyAllowed;
     } catch (error) {
       logger.error("Error checking user rate limit:", error);
       return false;
     }
   }
 
+  private async resetUserCountersIfNeeded(userId: string): Promise<void> {
+    try {
+      const user = await User.findById(userId).exec();
+      if (!user) {
+        return;
+      }
+
+      const now = new Date();
+      const lastReset = new Date(user.emailLimits.lastResetDate);
+
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+
+      const startOfLastResetDay = new Date(lastReset);
+      startOfLastResetDay.setHours(0, 0, 0, 0);
+
+      const needsDailyReset =
+        startOfToday.getTime() > startOfLastResetDay.getTime();
+
+      const daysSinceReset = Math.floor(
+        (now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const needsMonthlyReset = daysSinceReset >= 30;
+
+      if (needsMonthlyReset) {
+        await User.findByIdAndUpdate(userId, {
+          "emailLimits.dailyUsed": 0,
+          "emailLimits.monthlyUsed": 0,
+          "emailLimits.lastResetDate": now,
+        }).exec();
+        logger.info(
+          `🔄 Reset monthly and daily counters for user ${userId} (${daysSinceReset} days since last reset)`
+        );
+      } else if (needsDailyReset) {
+        await User.findByIdAndUpdate(userId, {
+          "emailLimits.dailyUsed": 0,
+          "emailLimits.lastResetDate": now,
+        }).exec();
+        logger.info(`🔄 Reset daily counter for user ${userId} (new day)`);
+      }
+    } catch (error) {
+      logger.error(`Error resetting counters for user ${userId}:`, error);
+    }
+  }
+
   private async updateUserEmailCount(userId: string): Promise<void> {
     try {
-      await User.findByIdAndUpdate(userId, {
-        $inc: { "subscription.emailsUsed": 1 },
-      }).exec();
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          $inc: {
+            "emailLimits.dailyUsed": 1,
+            "emailLimits.monthlyUsed": 1,
+          },
+        },
+        { new: true }
+      ).exec();
+
+      if (updatedUser) {
+        logger.info(
+          `📈 Updated email count for user ${userId} - Daily: ${updatedUser.emailLimits.dailyUsed}/${updatedUser.emailLimits.dailyLimit}, Monthly: ${updatedUser.emailLimits.monthlyUsed}/${updatedUser.emailLimits.monthlyLimit}`
+        );
+      }
     } catch (error) {
       logger.error("Error updating user email count:", error);
+    }
+  }
+
+  private async ensureUserLimits(userId: string): Promise<void> {
+    try {
+      const user = await User.findById(userId).exec();
+      if (!user) {
+        return;
+      }
+
+      let dailyLimit = 100;
+      let monthlyLimit = 3000;
+
+      switch (user.subscription.plan) {
+        case "starter":
+          dailyLimit = 167;
+          monthlyLimit = 5000;
+          break;
+        case "pro":
+          dailyLimit = 600;
+          monthlyLimit = 18000;
+          break;
+        case "premium":
+          dailyLimit = 1334;
+          monthlyLimit = 40000;
+          break;
+        default:
+          dailyLimit = 100;
+          monthlyLimit = 3000;
+          break;
+      }
+
+      if (
+        user.emailLimits.dailyLimit !== dailyLimit ||
+        user.emailLimits.monthlyLimit !== monthlyLimit
+      ) {
+        await User.findByIdAndUpdate(userId, {
+          "emailLimits.dailyLimit": dailyLimit,
+          "emailLimits.monthlyLimit": monthlyLimit,
+        }).exec();
+        logger.info(
+          `🔧 Updated limits for user ${userId} (${user.subscription.plan}): Daily ${dailyLimit}, Monthly ${monthlyLimit}`
+        );
+      }
+    } catch (error) {
+      logger.error("Error ensuring user limits:", error);
     }
   }
 

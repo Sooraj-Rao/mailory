@@ -39,7 +39,6 @@ export async function GET() {
       return NextResponse.json(data, { status: response.status })
     }
 
-    // Transform the response to match the expected format
     return NextResponse.json({
       stats: data.emails,
       timestamp: data.timestamp,

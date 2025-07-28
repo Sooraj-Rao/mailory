@@ -1,20 +1,21 @@
-import mongoose, { type Document, Schema } from "mongoose"
+import mongoose, { type Document, Schema } from "mongoose";
 
 export interface IBatchEmail extends Document {
-  userId: mongoose.Types.ObjectId
-  apiKeyId?: mongoose.Types.ObjectId
-  to: string
-  subject: string
-  html: string
-  text?: string
-  from: string
-  status: "pending" | "processing" | "sent" | "failed"
-  batchId: string
-  error?: string
-  messageId?: string
-  createdAt: Date
-  processedAt?: Date
-  attempts: number
+  userId: mongoose.Types.ObjectId;
+  apiKeyId?: mongoose.Types.ObjectId;
+  to: string;
+  subject: string;
+  html?: string;
+  text?: string;
+  from: string;
+  status: "pending" | "processing" | "sent" | "failed";
+  batchId: string;
+  error?: string;
+  messageId?: string;
+  createdAt: Date;
+  processedAt?: Date;
+  attempts: number;
+  domain: string;
 }
 
 const BatchEmailSchema = new Schema<IBatchEmail>(
@@ -38,7 +39,6 @@ const BatchEmailSchema = new Schema<IBatchEmail>(
     },
     html: {
       type: String,
-      required: true,
     },
     text: String,
     from: {
@@ -64,13 +64,14 @@ const BatchEmailSchema = new Schema<IBatchEmail>(
   },
   {
     timestamps: true,
-  },
-)
+  }
+);
 
-BatchEmailSchema.index({ status: 1, createdAt: 1 })
-BatchEmailSchema.index({ userId: 1, createdAt: -1 })
-BatchEmailSchema.index({ batchId: 1 })
+BatchEmailSchema.index({ status: 1, createdAt: 1 });
+BatchEmailSchema.index({ userId: 1, createdAt: -1 });
+BatchEmailSchema.index({ batchId: 1 });
 
-BatchEmailSchema.index({ batchId: 1, to: 1 }, { unique: true })
+BatchEmailSchema.index({ batchId: 1, to: 1 }, { unique: true });
 
-export default mongoose.models.BatchEmail || mongoose.model<IBatchEmail>("BatchEmail", BatchEmailSchema)
+export default mongoose.models.BatchEmail ||
+  mongoose.model<IBatchEmail>("BatchEmail", BatchEmailSchema);

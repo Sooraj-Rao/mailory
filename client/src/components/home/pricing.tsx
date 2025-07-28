@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Zap, Crown, Building } from "lucide-react";
+import { Check, Zap, Building } from "lucide-react";
 
 const plans = [
   {
@@ -25,25 +25,6 @@ const plans = [
     cta: "Get Started Free",
     popular: false,
     planId: "free",
-  },
-  {
-    name: "Starter",
-    price: "₹99",
-    period: "per month",
-    description: "For growing businesses",
-    icon: Crown,
-    color: "from-cyan-500 to-blue-500",
-    features: [
-      "5,000 emails/month",
-      "167 emails/day",
-      "Advanced templates",
-      "Email scheduling",
-      "Analytics & reporting",
-      "Priority support",
-    ],
-    cta: "Start Starter Plan",
-    popular: false,
-    planId: "starter",
   },
   {
     name: "Pro",
