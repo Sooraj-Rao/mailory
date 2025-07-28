@@ -8,25 +8,28 @@ export async function validateApiKey(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization")
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.log('1',authHeader)
       return { isValid: false, apiKey: null, userId: null }
     }
-
+    
     const keyValue = authHeader.substring(7)
     await connectDB()
-
+    
     const apiKey = await ApiKey.findOne({ keyValue }).populate("userId")
     if (!apiKey) {
+      console.log('2',apiKey)
       return { isValid: false, apiKey: null, userId: null }
     }
-
+    
     await ApiKey.findByIdAndUpdate(apiKey._id, { lastUsed: new Date() })
-
+    
     return {
       isValid: true,
       apiKey,
       userId: apiKey.userId,
     }
   } catch (error) {
+    console.log('3',error)
     console.error("API key validation error:", error)
     return { isValid: false, apiKey: null, userId: null }
   }
