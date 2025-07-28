@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Crown, CheckCircle, Zap, Users, Star, Loader2 } from "lucide-react";
+import { Crown, Zap, Users, Star, Loader2 } from "lucide-react";
 import { useZustandStore } from "@/zustand/store";
 import { SUBSCRIPTION_PLANS } from "@/components/payment/subscription-modal";
 import { formatDistanceToNowStrict } from "date-fns";

@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import connectDB from "@/lib/mongodb";
 import BatchEmail from "@/models/BatchEmail";
 import {
   validateApiKey,
@@ -8,6 +7,8 @@ import {
 } from "@/lib/api-auth";
 import { randomBytes } from "crypto";
 import { setCorsHeaders, handleCorsOptions } from "@/lib/cors";
+import { Domain } from "@/models/Domain";
+import { validateAndExtractDomain } from "../helper/email-name-extract";
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,7 +35,31 @@ export async function POST(request: NextRequest) {
         NextResponse.json({ error: isErrorValidation }, { status: 400 })
       );
     }
-    await connectDB();
+
+    const { valid, domain, formatError } = validateAndExtractDomain(from);
+
+    if (!valid) {
+      return NextResponse.json({ error: formatError }, { status: 400 });
+    }
+
+    if (domain) {
+      const isValid = await Domain.findOne({
+        $or: [{ domain }, { mailFromDomain: domain }],
+        dkimStatus: "verified",
+        userId,
+      });
+      if (!isValid) {
+        const isMisTypes = "mailory.site".includes(domain);
+        return NextResponse.json(
+          {
+            error: `Invalid 'from' Domain: ${domain}${
+              isMisTypes ? ", You have mistyped 'mailory.site'" : ""
+            }`,
+          },
+          { status: 400 }
+        );
+      }
+    }
 
     const { allowed, limits, dailyCount, monthlyCount } = await checkRateLimit(
       userId

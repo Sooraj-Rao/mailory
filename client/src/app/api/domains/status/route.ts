@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { SESv2Client, GetEmailIdentityCommand } from "@aws-sdk/client-sesv2";
 import { getAuthToken, verifyAuthToken } from "@/lib/auth-cookies";
@@ -44,7 +45,8 @@ export async function POST(req: NextRequest) {
       );
     }
     return NextResponse.json({
-      verified: response.VerifiedForSending,
+      // verified: response.VerifiedForSending,
+      verified: response.VerifiedForSendingStatus,
       dkimStatus: domainStatus.dkimStatus,
     });
   } catch (error: any) {

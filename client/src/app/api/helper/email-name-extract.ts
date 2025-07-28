@@ -23,35 +23,27 @@ export function getFromName(from: string) {
   return from || "Mailory";
 }
 
-type ExtractedInfo = {
-  domain: string | null;
-  name: string | null;
-};
+export function validateAndExtractDomain(fromField: string): {
+  valid: boolean;
+  domain?: string;
+  formatError?: string;
+} {
+  const pattern = /^([\w\s]+)\s<([\w.-]+)@([\w.-]+\.[a-zA-Z]{2,})>$/;
+  const match = fromField.match(pattern);
 
-export function extractFromField(from: string): ExtractedInfo {
-  from = from.trim();
-
-  const angleMatch = from.match(/<\s*([^<>@]+@[^<>]+)\s*>/);
-  if (angleMatch) {
-    const email = angleMatch[1].trim();
-    const domain = email.split('@')[1];
+  if (!match) {
     return {
-      domain,
-      name: null
+      valid: false,
+      formatError:
+        "Invalid 'from' format. Please use the pattern: 'name <name@mailory.site>' or a verified domain, for example: 'name <name@yourdomain.com>'.",
     };
   }
 
-  const emailMatch = from.match(/^[^<>@]+@[^<>]+$/);
-  if (emailMatch) {
-    const domain = from.split('@')[1];
-    return {
-      domain,
-      name: null
-    };
-  }
+  const [, , , domain] = match;
 
-  return {
-    domain: null,
-    name: from
-  };
+  if (domain.toLowerCase() === "mailory.site") {
+    return { valid: true };
+  } else {
+    return { valid: true, domain };
+  }
 }

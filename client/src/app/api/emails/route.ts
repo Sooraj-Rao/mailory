@@ -7,9 +7,8 @@ import {
   getRateLimitError,
   validateApiKey,
 } from "@/lib/api-auth";
-import connectDB from "@/lib/mongodb";
 import EmailLog from "@/models/EmailLog";
-import { extractFromField } from "../helper/email-name-extract";
+import { validateAndExtractDomain } from "../helper/email-name-extract";
 import { Domain } from "@/models/Domain";
 
 export async function POST(request: NextRequest) {
@@ -64,13 +63,28 @@ export async function POST(request: NextRequest) {
         );
       }
     }
+    const { valid, domain, formatError } = validateAndExtractDomain(from);
 
-    await connectDB();
-    const { domain, name } = extractFromField(from);
+    if (!valid) {
+      return NextResponse.json({ error: formatError }, { status: 400 });
+    }
+
     if (domain) {
-      const isValid = await Domain.findOne({ domain, dkimStatus: "verified" });
-      if (isValid) {
-        NextResponse.json({ error: "Invalid domain." }, { status: 400 });
+      const isValid = await Domain.findOne({
+        $or: [{ domain }, { mailFromDomain: domain }],
+        dkimStatus: "verified",
+        userId,
+      });
+      if (!isValid) {
+        const isMisTypes = "mailory.site".includes(domain);
+        return NextResponse.json(
+          {
+            error: `Invalid 'from' Domain: ${domain}${
+              isMisTypes ? ", You have mistyped 'mailory.site'" : ""
+            }`,
+          },
+          { status: 400 }
+        );
       }
     }
 
@@ -78,7 +92,7 @@ export async function POST(request: NextRequest) {
       userId,
       apiKeyId: apiKey._id,
       to: Array.isArray(to) ? to.join(", ") : to,
-      from: domain ? from : name,
+      from,
       subject,
       status: "queued",
     });
@@ -95,7 +109,7 @@ export async function POST(request: NextRequest) {
           subject,
           text,
           html,
-          from: domain ? from : name,
+          from,
           apiKeyId: apiKey._id,
           userId: userId._id,
         }),

@@ -93,7 +93,7 @@ export default function DocsPage() {
                     </Button>
                   </Link>
                   <Link href="/register">
-                    <Button variant="grad1" size="sm">
+                    <Button variant="grad" size="sm">
                       Get Started
                     </Button>
                   </Link>
@@ -175,7 +175,7 @@ export default function DocsPage() {
                         </p>
                       </div>
                       <Link href="/dashboard/api-keys">
-                        <Button variant="grad1" size="sm">
+                        <Button variant="grad" size="sm">
                           Create API Key
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>

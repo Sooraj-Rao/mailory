@@ -13,7 +13,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { copyToClipboard } from "@/app/helper/copy";
-import Link from "next/link";
 
 interface DNSRecord {
   name: string;
@@ -281,7 +280,7 @@ export default function AddDomainPage() {
                   disabled={!dnsRecords.length || recordsAdded}
                   className="mt-4 custom-gradient bg-green-600 hover:bg-green-700"
                 >
-                  I've added the records
+                  I&apos;ve added the records
                 </Button>
               </div>
             </div>

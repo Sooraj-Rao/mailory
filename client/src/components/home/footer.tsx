@@ -22,7 +22,7 @@ export default function Footer() {
             <a
               target="_blank"
               className="text-cyan-300 px-1 font-semibold  hover:underline"
-              href="https://soorajrao.in/?ref=email_app"
+              href="https://soorajrao.in/?ref=mailory_app"
             >
               Sooraj Rao
             </a>

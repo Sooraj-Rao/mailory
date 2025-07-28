@@ -3,14 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/user/auth-user";
-
-import Header from "@/components/home/header";
-import HeroSection from "@/components/landing/hero-section";
-import FeaturesSection from "@/components/landing/feature-section";
-import PricingSection from "@/components/landing/pricing-section";
-import TestimonialsSection from "@/components/landing/testimonials-section";
-import CTASection from "@/components/landing/cta-section";
-import FooterSection from "@/components/landing/footer-section";
 import Landing from "@/components/home/landing";
 
 export default function HomePage() {

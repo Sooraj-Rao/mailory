@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import {
   SESv2Client,
@@ -33,7 +34,8 @@ export async function POST(req: NextRequest) {
   try {
     const createIdentityCommand = new CreateEmailIdentityCommand({
       EmailIdentity: domain,
-      DKIMSigningAttributes: {
+      // DKIMSigningAttributes
+      DkimSigningAttributes: {
         DomainSigningSelector: "mailory",
         NextSigningKeyLength: "RSA_2048_BIT",
       },

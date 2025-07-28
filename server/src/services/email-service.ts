@@ -37,9 +37,7 @@ export class EmailService {
     const recipients = Array.isArray(to) ? to : [to];
 
     const sesParams = {
-      Source: `"${from || "Mailory"}" <${
-        process.env.DEFAULT_FROM_EMAIL || "service@email.mailory.site"
-      }>`,
+      Source: from!,
       Destination: { ToAddresses: recipients },
       Message: {
         Subject: { Data: subject },

@@ -31,14 +31,12 @@ import {
   Trash2,
   RefreshCw,
   Pencil,
-  Copy,
   ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Separator } from "@/components/ui/separator";
-import { copyToClipboard } from "@/app/helper/copy";
 
 interface ApiKeyDetail {
   id: string;
