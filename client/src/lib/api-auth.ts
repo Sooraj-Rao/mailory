@@ -7,10 +7,8 @@ import User from "@/models/User";
 export async function validateApiKey(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
-    console.log("authHeader", authHeader);
-    console.log(request.headers);
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.log("1", authHeader);
+   
       return { isValid: false, apiKey: null, userId: null };
     }
 
@@ -19,7 +17,7 @@ export async function validateApiKey(request: NextRequest) {
 
     const apiKey = await ApiKey.findOne({ keyValue }).populate("userId");
     if (!apiKey) {
-      console.log("2", apiKey);
+  
       return { isValid: false, apiKey: null, userId: null };
     }
 
@@ -31,7 +29,7 @@ export async function validateApiKey(request: NextRequest) {
       userId: apiKey.userId,
     };
   } catch (error) {
-    console.log("3", error);
+
     console.error("API key validation error:", error);
     return { isValid: false, apiKey: null, userId: null };
   }
