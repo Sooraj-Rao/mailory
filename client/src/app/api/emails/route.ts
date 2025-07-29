@@ -13,8 +13,6 @@ import { Domain } from "@/models/Domain";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("request.headers", request.headers.get('mailory-authorization'));
-    console.log("request", request);
     const { isValid, apiKey, userId } = await validateApiKey(request);
     if (!isValid || !apiKey || !userId) {
       return setCorsHeaders(getApiKeyError());

@@ -6,7 +6,7 @@ import User from "@/models/User";
 
 export async function validateApiKey(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
+    const authHeader = request.headers.get("mailory-authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
    
       return { isValid: false, apiKey: null, userId: null };
