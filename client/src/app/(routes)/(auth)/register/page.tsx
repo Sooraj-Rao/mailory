@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,13 +11,12 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Zap, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useUser } from "@/hooks/user/auth-user";
+import { Logo } from "@/components/home/sidebar";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -26,14 +25,6 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const { userData, userDataLoading } = useUser();
-
-  useEffect(() => {
-    if (userData) {
-      router.push("/dashboard/emails");
-    }
-  }, [userData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,14 +52,6 @@ export default function RegisterPage() {
     }
   };
 
-  if (userDataLoading) {
-    return (
-      <div className=" text-center mt-40">
-        <h1>loading...</h1>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen w-screen flex items-center justify-center p-4 relative overflow-hidden app-gradient">
       <div className="absolute inset-0">
@@ -86,14 +69,7 @@ export default function RegisterPage() {
 
       <Card className="w-full max-w-md card-gradient relative z-10">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center">
-              <Zap className="w-7 h-7 text-white" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-bold text-foreground">
-            Create Account
-          </CardTitle>
+          <Logo />
           <CardDescription>
             Join Mailory and start sending emails today
           </CardDescription>
@@ -145,7 +121,7 @@ export default function RegisterPage() {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0 shadow-lg shadow-cyan-500/25"
+              size='lg'
               disabled={loading}
             >
               {loading ? "Creating account..." : "Create Account"}
@@ -158,7 +134,7 @@ export default function RegisterPage() {
             </span>
             <Link
               href="/login"
-              className="text-cyan-400 hover:text-cyan-300 font-medium"
+              className=" text-primary hover:underline"
             >
               Sign in
             </Link>

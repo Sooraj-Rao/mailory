@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,13 +11,12 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Zap, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useUser } from "@/hooks/user/auth-user";
+import { Logo } from "@/components/home/sidebar";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -25,13 +24,6 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { userData, userDataLoading } = useUser();
-
-  useEffect(() => {
-    if (userData) {
-      router.push("/dashboard/emails");
-    }
-  }, [userData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,13 +51,6 @@ export default function LoginPage() {
     }
   };
 
-  if (userDataLoading) {
-    return (
-      <div className=" text-center mt-40">
-        <h1>loading...</h1>
-      </div>
-    );
-  }
   return (
     <div className="min-h-screen w-screen flex items-center justify-center p-4 relative overflow-hidden app-gradient">
       <div className="absolute inset-0">
@@ -83,14 +68,7 @@ export default function LoginPage() {
 
       <Card className="w-full max-w-md card-gradient relative z-10">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center">
-              <Zap className="w-7 h-7 text-white" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-bold text-foreground">
-            Welcome Back
-          </CardTitle>
+          <Logo />
           <CardDescription>Sign in to your Mailory account</CardDescription>
         </CardHeader>
         <CardContent>
@@ -125,11 +103,7 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0 shadow-lg shadow-cyan-500/25"
-              disabled={loading}
-            >
+            <Button size="lg" type="submit" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
@@ -138,10 +112,7 @@ export default function LoginPage() {
             <span className="text-muted-foreground">
               Don&apos;t have an account?{" "}
             </span>
-            <Link
-              href="/register"
-              className="text-cyan-400 hover:text-cyan-300 font-medium"
-            >
+            <Link href="/register" className=" text-primary hover:underline">
               Sign up
             </Link>
           </div>

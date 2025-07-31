@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Zap, Building } from "lucide-react";
+import { Check } from "lucide-react";
 
 const plans = [
   {
@@ -12,7 +12,6 @@ const plans = [
     price: "₹0",
     period: "forever",
     description: "Perfect for getting started",
-    icon: Zap,
     color: "from-gray-500 to-gray-600",
     features: [
       "3,000 emails/month",
@@ -31,7 +30,6 @@ const plans = [
     price: "₹299",
     period: "per month",
     description: "For scaling companies",
-    icon: Building,
     color: "from-purple-500 to-pink-500",
     features: [
       "18,000 emails/month",
@@ -51,7 +49,6 @@ const plans = [
     price: "₹599",
     period: "per month",
     description: "For large organizations",
-    icon: Building,
     color: "from-orange-500 to-red-500",
     features: [
       "40,000 emails/month",
@@ -70,10 +67,6 @@ const plans = [
 export default function Pricing() {
   return (
     <section id="pricing" className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-800" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
@@ -105,11 +98,6 @@ export default function Pricing() {
               )}
 
               <CardHeader className="text-center pb-8 pt-8">
-                <div
-                  className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${plan.color} flex items-center justify-center`}
-                >
-                  <plan.icon className="w-8 h-8 text-white" />
-                </div>
                 <h3 className="text-2xl font-bold text-white mb-2">
                   {plan.name}
                 </h3>

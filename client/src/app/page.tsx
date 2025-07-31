@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/user/auth-user";
-import Landing from "@/components/home/landing";
+import LandingPage from "@/components/home/landing/page";
 
 export default function HomePage() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Landing />
+      <LandingPage />
     </div>
   );
 }

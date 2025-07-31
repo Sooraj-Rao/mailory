@@ -491,7 +491,7 @@ export default function CreateBroadcastPage() {
             </Card>
           </div>
 
-          <div className="hidden flex flex-col gap-2">
+          <div className="hidden s flex-col gap-2">
             <Button
               variant="outline"
               className="custom-gradient bg-transparent"

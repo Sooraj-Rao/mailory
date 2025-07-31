@@ -52,6 +52,7 @@ export default function CodeBlock({
           borderRadius: "0.375rem",
           fontSize: "13px",
           margin: 0,
+          background:'black'
         }}
       >
         {code}

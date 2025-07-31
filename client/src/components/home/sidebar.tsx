@@ -133,7 +133,7 @@ export function CustomSidebar({ isOpen, onToggle }: CustomSidebarProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start h-auto p-3 hover:bg-accent/20"
+                  className="w-full justify-start h-auto p-1 hover:bg-accent/20"
                 >
                   <Avatar className="w-8 h-8 mr-3">
                     <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm">
@@ -156,7 +156,10 @@ export function CustomSidebar({ isOpen, onToggle }: CustomSidebarProps) {
                 align="end"
                 className="w-56 bg-popover border-border"
               >
-                <a target="_blank" href="https://contact.soorajrao.in/?querytype=report a issue&message=i want to reporta issue in mailory.site&utm_medium=mailory_sidebar&utm_source=mailory">
+                <a
+                  target="_blank"
+                  href="https://contact.soorajrao.in/?querytype=report a issue&message=i want to reporta issue in mailory.site&utm_medium=mailory_sidebar&utm_source=mailory"
+                >
                   <DropdownMenuItem className="text-muted-foreground hover:bg-accent/20">
                     <Bug className="w-4 h-4 mr-2" />
                     Report a Bug
