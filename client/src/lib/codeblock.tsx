@@ -1,8 +1,8 @@
-"use client";
 import { useTheme } from "next-themes";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import vscDarkPlus from "react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus";
-import github from "react-syntax-highlighter/dist/cjs/styles/prism";
+import lightfair from "react-syntax-highlighter/dist/esm/styles/prism";
+
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
@@ -33,7 +33,7 @@ export default function CodeBlock({
       {shouldCopy && (
         <button
           onClick={handleCopy}
-          className="absolute top-4 right-4 z-10 flex items-center justify-center p-1.5 rounded-md  transition "
+          className="absolute top-4 right-4 z-10 flex items-center justify-center p-1.5 rounded-md transition "
           aria-label="Copy code"
         >
           {!copied ? (
@@ -46,13 +46,15 @@ export default function CodeBlock({
 
       <SyntaxHighlighter
         language={language}
-        style={theme === "dark" ? vscDarkPlus : github}
+        style={theme === "dark" ? vscDarkPlus : lightfair}
         customStyle={{
           padding: "1rem",
           borderRadius: "0.375rem",
           fontSize: "13px",
           margin: 0,
-          background:'black'
+          overflowX: "auto",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
         }}
       >
         {code}

@@ -4,18 +4,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Mail,
-  Code,
-  Globe,
-  ArrowRight,
-  Copy,
-  Check,
-  Send,
-} from "lucide-react";
+import { Mail, Code, Globe, ArrowRight, Copy, Check, Send } from "lucide-react";
 import Link from "next/link";
 import CodeBlock from "@/lib/codeblock";
-import { Logo } from "../sidebar";
+import { Logo } from "./sidebar";
 
 const languages = [
   {
@@ -192,8 +184,8 @@ export default function LandingPage() {
       <section className="relative z-10 max-w-7xl mx-auto px-6 pt-20 pb-32">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
-            <div className="space-y-6">
-              <div className="text-8xl font-black leading-none tracking-tight">
+            <div className="space-y-6 ">
+              <div className="md:text-8xl sm:text-6xl text-3xl  font-black leading-none tracking-tight">
                 <div className="bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent">
                   Simple Email
                 </div>
@@ -207,85 +199,60 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <p className="text-xl text-gray-300 leading-relaxed max-w-lg">
+              <p className="md:text-xl text-sm text-wrap text-gray-300 leading-relaxed max-w-lg">
                 Send transactional and broadcast emails easily, with support for
                 custom domains to maintain your brand.
               </p>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/register">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-lg px-8 py-6  hover:shadow-blue-500/25 transition-all duration-300 group"
+                  className=" scale-90 sm:scale-100  text-sm sm:text-lg px-8 py-6  hover:shadow-blue-500/25 transition-all duration-300 group"
                 >
                   Start Building
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 h-5 w-5  group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link href="/docs">
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-gray-600 text-lg px-8 py-6 bg-black/50 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                  className="border-gray-600 text-sm sm:text-lg scale-90 sm:scale-100 px-8 py-6 bg-black/50 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
                 >
-                  <Code className="mr-2 h-5 w-5" />
+                  <Code className="mr-2 hidden h-5 w-5" />
                   Documentation
                 </Button>
               </Link>
             </div>
           </div>
 
-          <div className="relative h-96 lg:h-[600px] perspective-1000">
-            {[...Array(1)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-72 h-44  backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl transition-all duration-1000 hover:scale-105 cursor-pointer"
-                style={{
-                  top: `${20 + i * 15}%`,
-                  left: `${10 + (i % 2) * 40}%`,
-
-                  zIndex: 10 - i,
-                }}
-              >
-                <div className="p-6 h-full flex flex-col justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10  rounded-lg flex items-center justify-center">
-                      <Mail className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-white">
-                        Email Sent
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        hi@soorajrao.in
-                      </div>
-                    </div>
+          <div className="relative flex flex-col items-center gap-10 h-96 lg:h-[600px] perspective-1000">
+            <div className="sm:absolute w-72 h-44 top-[10%]  left-20 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl transition-all duration-1000 hover:scale-105 cursor-pointer">
+              <div className="p-6 h-full flex flex-col justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10  rounded-lg flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-white" />
                   </div>
-                  <div className="space-y-2">
-                    <div
-                      className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
-                      style={{ width: `${60 + i * 10}%` }}
-                    />
-                    <div
-                      className="h-2 bg-gray-700 rounded-full"
-                      style={{ width: `${40 + i * 8}%` }}
-                    />
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {new Date(Date.now() - i * 60000).toLocaleTimeString()}
+                  <div>
+                    <div className="text-sm font-medium text-white">
+                      Email Sent
+                    </div>
+                    <div className="text-xs text-gray-400">hi@soorajrao.in</div>
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <div className="h-2 bg-gradient-to-r w-[50%] from-blue-500 to-cyan-500 rounded-full" />
+                  <div className="h-2 bg-gray-700 w-[85%] rounded-full" />
+                </div>
+                <div className="text-xs text-gray-400">
+                  {new Date(Date.now()).toLocaleTimeString()}
+                </div>
               </div>
-            ))}
+            </div>
 
-            <div
-              className="absolute w-80 h-48  bg-black/95 backdrop-blur-sm rounded-xl border border-blue-500/30 shadow-2xl font-mono text-xs overflow-hidden"
-              style={{
-                top: "50%",
-                right: "0%",
-              }}
-            >
+            <div className="sm:absolute w-80 h-48   top-[50%] right-0  backdrop-blur-sm rounded-xl border border-blue-500/30 shadow-2xl font-mono text-xs overflow-hidden">
               <div className="p-4 space-y-1">
                 <div className="text-blue-400">POST /api/emails</div>
                 <div className="text-gray-500">{"{"}</div>
@@ -299,7 +266,7 @@ export default function LandingPage() {
                   {'"subject"'}: {'"Welcome!"'},
                 </div>
                 <div className="text-gray-300 ml-2">
-                  {'"html"'}: {'"&lt;h1&gt;Hello World&lt;/h1&gt;"'}
+                  {'"html"'}: {'"<h1>Hellow there!</h1>"'}
                 </div>
                 <div className="text-gray-500">{"}"}</div>
                 <div className="mt-4 text-green-400">
@@ -309,7 +276,7 @@ export default function LandingPage() {
             </div>
 
             <div
-              className="absolute hidden w-64 h-40 bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl"
+              className="absolute hidden  w-64 h-40 bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl"
               style={{
                 bottom: "10%",
                 left: "20%",
@@ -348,7 +315,7 @@ export default function LandingPage() {
             <div className="relative inline-block mb-12">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl blur-xl opacity-50" />
             </div>
-            <h2 className="text-5xl md:text-7xl font-black mb-8">
+            <h2 className="text-3xl md:text-7xl font-black mb-8">
               <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 Integrate{" "}
               </span>
@@ -356,7 +323,7 @@ export default function LandingPage() {
                 in 5 minutes
               </span>
             </h2>
-            <p className="text-xl md:text-2xl text-gray-400 max-w-4xl mx-auto leading-relaxed font-light">
+            <p className="sm:text-xl text-sm md:text-2xl text-gray-400 max-w-4xl mx-auto leading-relaxed font-light">
               Simple REST API for sending transactional emails and broadcast
               campaigns. Get your API key and start sending emails.
             </p>
@@ -367,7 +334,7 @@ export default function LandingPage() {
               <button
                 key={lang.id}
                 onClick={() => setSelectedLanguage(lang.id)}
-                className={`relative group flex items-center space-x-3 px-6 py-4 rounded-2xl border transition-all duration-500 hover:scale-105 ${
+                className={`relative group flex items-center space-x-3 text-sm px-4 py-2 rounded-2xl border transition-all duration-500 hover:scale-105 ${
                   selectedLanguage === lang.id
                     ? "bg-gradient-to-r from-gray-800/80 to-gray-700/80 border-gray-600/80 text-white shadow-2xl shadow-gray-900/50 backdrop-blur-xl"
                     : "bg-gradient-to-r from-gray-900/40 to-gray-800/40 border-gray-700/40 text-gray-400 hover:text-white hover:border-gray-600/60 backdrop-blur-xl"
@@ -422,12 +389,10 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mb-20 mt-60 max-w-6xl mx-auto">
+          <div className="mb-20 sm:block hidden mt-60 max-w-6xl mx-auto">
             <div className="relative group">
               <div className="relative h-96 rounded-3xl backdrop-blur-xl flex items-center justify-center">
-                <div className="text-center">
-                  <img alt="" src="../../../../home/api.png" />
-                </div>
+                <img className=" " alt="" src="../../../../home/api.png" />
               </div>
             </div>
           </div>
@@ -437,7 +402,7 @@ export default function LandingPage() {
       <section id="features" className="relative py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-24">
-            <h2 className="text-5xl md:text-7xl font-black mb-8">
+            <h2 className="text-3xl md:text-7xl font-black mb-8">
               <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 Core{" "}
               </span>
@@ -445,7 +410,7 @@ export default function LandingPage() {
                 Features
               </span>
             </h2>
-            <p className="text-xl md:text-2xl text-gray-400 max-w-4xl mx-auto leading-relaxed font-light">
+            <p className="text-sm md:text-2xl text-gray-400 max-w-4xl mx-auto leading-relaxed font-light">
               Everything you need to send emails. From transactional emails to
               broadcast campaigns, with custom domains and flexible billing.
             </p>
@@ -461,16 +426,16 @@ export default function LandingPage() {
                         <Send className="w-6 h-6 sm:w-8 sm:h-8" />
                       </div>
                     </div>
-                    <h3 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    <h3 className="text-lg sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                       Email Sending
                     </h3>
                   </div>
-                  <p className="text-gray-400 mb-8 leading-relaxed text-lg">
+                  <p className="text-gray-400 mb-8 leading-relaxed sm:text-lg text-sm">
                     Send transactional emails like password resets,
                     confirmations, and user notifications using a
                     straightforward API.
                   </p>
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-sm sm:text-base">
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-blue-400 rounded-full" />
                       <span className="text-gray-300">
@@ -503,16 +468,16 @@ export default function LandingPage() {
                         <Globe className="w-6 h-6 sm:w-8 sm:h-8" />
                       </div>
                     </div>
-                    <h3 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    <h3 className="text-lg sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                       Custom Domains
                     </h3>
                   </div>
-                  <p className="text-gray-400 mb-8 leading-relaxed text-lg">
+                  <p className="text-gray-400 mb-8 leading-relaxed sm:text-lg text-sm ">
                     Use your own domain to send emails, with support for DKIM
                     and domain verification to maintain brand identity and
                     improve deliverability.
                   </p>
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-sm sm:text-base">
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-green-400 rounded-full" />
                       <span className="text-gray-300">Domain Verification</span>
@@ -531,7 +496,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mb-20 max-w-6xl mx-auto">
+          <div className="mb-20 sm:block hidden max-w-6xl mx-auto">
             <div className="relative group">
               <div className="relative h-96 rounded-3xl backdrop-blur-xl flex items-center justify-center">
                 <div className="text-center">
@@ -553,7 +518,7 @@ export default function LandingPage() {
                   <Mail className="w-10 h-10 text-gray-400" />
                 </div>
                 <p className="text-gray-500 font-medium text-lg">
-                  Image placeholder - Email logs and analytics
+                  Email logs and analytics
                 </p>
               </div>
             </div>
@@ -566,16 +531,18 @@ export default function LandingPage() {
         className="relative z-10 max-w-7xl mx-auto px-6 py-32"
       >
         <div className="text-center mb-16">
-          <h2 className="text-6xl font-black mb-4">
+          <h2 className="text-3xl sm:text-6xl font-black mb-4">
             <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
               Simple
             </span>{" "}
             pricing
           </h2>
-          <p className="text-xl text-gray-300">Start free, scale as you grow</p>
+          <p className="sm:text-xl text-sm text-gray-300">
+            Start free, scale as you grow
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl text-sm sm:text-base mx-auto">
           {[
             {
               name: "Free",
@@ -590,7 +557,7 @@ export default function LandingPage() {
             },
             {
               name: "Pro",
-              price: "₹299",
+              price: "₹599",
               features: [
                 "18,000 emails/month",
                 "600 emails/day",
@@ -601,7 +568,7 @@ export default function LandingPage() {
             },
             {
               name: "Premium",
-              price: "₹599",
+              price: "₹1199",
               features: [
                 "40,000 emails/month",
                 "1,334 emails/day",
@@ -627,8 +594,12 @@ export default function LandingPage() {
                 </div>
               )}
               <div className="text-center">
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <div className="text-5xl font-black mb-6">{plan.price}</div>
+                <h3 className="sm:text-2xl text-lg font-bold mb-2">
+                  {plan.name}
+                </h3>
+                <div className="sm:text-5xl text-2xl font-black mb-6">
+                  {plan.price}
+                </div>
                 <ul className="space-y-4 mb-8">
                   {plan.features.map((feature, j) => (
                     <li key={j} className="flex items-center gap-3">
@@ -653,18 +624,28 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+        <p className="text-center my-7">
+          To customize your plan, please
+          <a
+            target="_blank"
+            href="https://contact.soorajrao.in/?querytype=contact&message=I want to customize plan for mailory&utm_medium=mailory_pricing&utm_source=mailory"
+            className="text-primary hover:underline ml-1"
+          >
+            reach out to us
+          </a>
+        </p>
       </section>
 
       <section className="relative py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent" />
         <div className="relative max-w-5xl mx-auto px-6 lg:px-8 text-center">
           <div className="mb-12">
-            <h2 className="text-5xl md:text-7xl font-black mb-8">
+            <h2 className="text-3xl md:text-7xl font-black mb-8">
               <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
                 Ready to start sending?
               </span>
             </h2>
-            <p className="text-xl md:text-2xl text-gray-400 mb-16 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className=" text-sm sm:text-xl md:text-2xl text-gray-400 mb-16 max-w-3xl mx-auto leading-relaxed font-light">
               Get your API key and start sending emails in minutes. Free tier
               available with generous limits to get you started.
             </p>
@@ -673,7 +654,7 @@ export default function LandingPage() {
             <Link href="/register">
               <Button
                 size="lg"
-                className="relative group  text-black  px-12 py-5 text-xl font-bold  hover:shadow hover:shadow-primary transition-all duration-500 "
+                className="relative group  scale-75 sm:scale-100   px-12 py-5 text-xl font-bold  hover:shadow hover:shadow-primary transition-all duration-500 "
               >
                 <span className="relative z-10 flex items-center">
                   Start for Free
@@ -681,103 +662,91 @@ export default function LandingPage() {
                 </span>
               </Button>
             </Link>
-            <Link href="/docs">
-              <Button
-                size="lg"
-                variant="outline"
-                className="relative group border-2 border-gray-600/50 text-white hover:border-gray-500 px-12 py-5 text-xl font-bold bg-gradient-to-r from-gray-900/60 to-gray-800/60 backdrop-blur-xl "
-              >
-                <span className="relative z-10">Read the Docs</span>
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
 
       <footer className="relative border-t pt-16 pb-4 border-white/5 bg-black">
-        <h1 className="text-[12rem] text-center  lg:text-[16rem] font-extrabold text-white/5 select-none">
+        <h1 className="md:text-[12rem] hidden md:block  text-center  lg:text-[16rem] font-extrabold text-white/5 select-none">
           MAILORY
         </h1>
 
         <div className="  max-w-7xl    mx-auto p-6">
-          <div className="flex justify-between gap-12  mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-12  mb-12">
             <div className="">
               <Logo />
             </div>
 
-            <div className=" ">
-              <div className="flex gap-20">
-                <div>
-                  <h3 className="text-white font-semibold mb-4">Application</h3>
-                  <ul className="space-y-3 text-gray-400 text-sm">
-                    <li>
-                      <Link
-                        href="/#features"
-                        className="hover:text-white transition-colors"
-                      >
-                        Features
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="/login"
-                        className="hover:text-white transition-colors"
-                      >
-                        Demo
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-semibold mb-4">Resources</h3>
-                  <ul className="space-y-3 text-gray-400 text-sm">
-                    <li>
-                      <Link
-                        href="#pricing"
-                        className="hover:text-white transition-colors"
-                      >
-                        Pricing
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="/docs"
-                        className="hover:text-white transition-colors"
-                      >
-                        Docs
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
+            <div className="flex flex-col sm:flex-row items-center gap-20">
+              <div>
+                <h3 className="text-white font-semibold mb-4">Application</h3>
+                <ul className="space-y-3 text-gray-400 text-sm">
+                  <li>
+                    <Link
+                      href="/#features"
+                      className="hover:text-white transition-colors"
+                    >
+                      Features
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/login"
+                      className="hover:text-white transition-colors"
+                    >
+                      Demo
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-white font-semibold mb-4">Resources</h3>
+                <ul className="space-y-3 text-gray-400 text-sm">
+                  <li>
+                    <Link
+                      href="#pricing"
+                      className="hover:text-white transition-colors"
+                    >
+                      Pricing
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/docs"
+                      className="hover:text-white transition-colors"
+                    >
+                      Docs
+                    </Link>
+                  </li>
+                </ul>
+              </div>
 
-                <div>
-                  <h3 className="text-white font-semibold mb-4">Help</h3>
-                  <ul className="space-y-3 text-gray-400 text-sm">
-                    <li>
-                      <Link
-                        href="https://contact.soorajrao.in/?querytype=contact&message=I wanna talk&utm_medium=mailory_sidebar&utm_source=mailory"
-                        className="hover:text-white transition-colors"
-                      >
-                        Contact
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="https://contact.soorajrao.in/?querytype=report a issue&message=i want to reporta issue in mailory.site&utm_medium=mailory_footer&utm_source=mailory"
-                        className="hover:text-white transition-colors"
-                      >
-                        Report bug
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
+              <div>
+                <h3 className="text-white font-semibold mb-4">Help</h3>
+                <ul className="space-y-3 text-gray-400 text-sm">
+                  <li>
+                    <Link
+                      href="https://contact.soorajrao.in/?querytype=contact&message=I wanna talk&utm_medium=mailory_sidebar&utm_source=mailory"
+                      className="hover:text-white transition-colors"
+                    >
+                      Contact
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="https://contact.soorajrao.in/?querytype=report a issue&message=i want to reporta issue in mailory.site&utm_medium=mailory_footer&utm_source=mailory"
+                      className="hover:text-white transition-colors"
+                    >
+                      Report bug
+                    </Link>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
 
           <div className="py-4 ">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-              <p className="text-gray-500 text-sm">&copy; 2025 Mailory</p>
+            <div className="flex  justify-center space-y-4 md:space-y-0">
               <p className="text-gray-500 text-sm">
                 Developed by{" "}
                 <a target="_blank" href="https://soorajrao.in/?ref=mailory">
