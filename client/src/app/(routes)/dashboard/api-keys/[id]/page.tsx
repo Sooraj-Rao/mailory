@@ -32,6 +32,7 @@ import {
   RefreshCw,
   Pencil,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -146,8 +147,11 @@ export default function ApiKeyDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-foreground text-lg">Loading...</div>
+     <div className="min-h-screen gap-x-2 app-gradient flex items-center justify-center p-4">
+        <p>
+          <Loader2 className=" animate-spin" />
+        </p>
+        <div className="text-foreground">Fetching API key info..</div>
       </div>
     );
   }

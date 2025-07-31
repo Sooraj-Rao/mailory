@@ -14,13 +14,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -230,14 +224,8 @@ export default function BroadcastDetailsPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Campaign Overview</CardTitle>
-                <CardDescription className="line-clamp-2">
-                  {broadcast.previewText}
-                </CardDescription>
-              </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mt-3">
                   {["sent", "failed", "pending", "processing"].map((status) => (
                     <div key={status} className="border rounded p-3">
                       <div
@@ -260,7 +248,7 @@ export default function BroadcastDetailsPage() {
                   ))}
                 </div>
 
-                <div className="mt-4 p-3 bg-muted rounded text-sm flex justify-between">
+                <div className="mt-4 p-3 bg-muted/40 rounded text-sm flex justify-between">
                   <span>Delivery Rate</span>
                   <span className="font-bold">{deliveryRate}%</span>
                 </div>
@@ -287,11 +275,8 @@ export default function BroadcastDetailsPage() {
 
           <div className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Campaign Info</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex justify-between">
+              <CardContent className="space-y-2 text-sm  mt-3">
+                <div className="flex justify-between ">
                   <span className="text-muted-foreground">From:</span>
                   <span className="truncate max-w-[120px]">
                     {broadcast.from}
@@ -348,7 +333,7 @@ export default function BroadcastDetailsPage() {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full lg:w-1/3"
+                className="w-full lg:w-1/3 placeholder:text-sm"
               />
               <Tabs
                 defaultValue="all"

@@ -34,11 +34,12 @@ export async function POST(req: NextRequest) {
   try {
     const createIdentityCommand = new CreateEmailIdentityCommand({
       EmailIdentity: domain,
-      // DKIMSigningAttributes
-      DkimSigningAttributes: {
-        DomainSigningSelector: "mailory",
-        NextSigningKeyLength: "RSA_2048_BIT",
-      },
+      ...({
+        DKIMSigningAttributes: {
+          DomainSigningSelector: "mailory",
+          NextSigningKeyLength: "RSA_2048_BIT",
+        },
+      } as any),
     });
 
     const createResponse = await sesClient.send(createIdentityCommand);
@@ -54,17 +55,17 @@ export async function POST(req: NextRequest) {
 
     const baseRecords = [
       {
-        name: domain,
+        name: "@",
         type: "TXT",
         value: "v=spf1 include:amazonses.com ~all",
       },
       {
-        name: `_dmarc.${domain}`,
+        name: `_dmarc`,
         type: "TXT",
         value: "v=DMARC1; p=none;",
       },
       {
-        name: domain,
+        name: "@",
         type: "MX",
         value: `feedback-smtp.${region}.amazonses.com`,
         priority: 10,

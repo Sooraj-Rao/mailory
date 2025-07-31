@@ -177,11 +177,7 @@ export default function ApiKeysPage() {
                   }}
                 >
                   <DialogTrigger asChild>
-                    <Button
-                      variant="grad"
-                      disabled={apiKeys.length >= 5}
-                      size="sm"
-                    >
+                    <Button disabled={apiKeys.length >= 5} size="sm">
                       <Plus className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
                       <span className="hidden sm:inline ">Create API Key</span>
                       <span className="sm:hidden">Create</span>
@@ -358,19 +354,13 @@ export default function ApiKeysPage() {
                   </div>
                 ))
               ) : isLoading ? (
-                <div className=" space-y-1">
-                  <div className=" h-12 bg-muted/40 animate-pulse"></div>
-                  <div className=" h-12  bg-muted/20 animate-pulse"></div>
-                  <div className=" h-12 bg-muted/40  animate-pulse"></div>
-                  <div className=" h-12 bg-muted/20 animate-pulse"></div>
-                  <div className=" h-12 bg-muted/40  animate-pulse"></div>
-                  <div className=" h-12 bg-muted/20 animate-pulse"></div>
+                <div>
+                  <div className=" h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className=" h-12  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                    <Key className="w-8 h-8 text-muted-foreground" />
-                  </div>
                   <p className="text-muted-foreground text-lg mb-2">
                     {searchQuery
                       ? "No API keys match your search"
@@ -382,10 +372,7 @@ export default function ApiKeysPage() {
                       : "Create your first API key to get started"}
                   </p>
                   {!searchQuery && (
-                    <Button
-                      className="custom-gradient"
-                      onClick={() => setShowCreateDialog(true)}
-                    >
+                    <Button size="sm" onClick={() => setShowCreateDialog(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create Your First API Key
                     </Button>
@@ -464,19 +451,13 @@ export default function ApiKeysPage() {
                 </Card>
               ))
             ) : isLoading ? (
-              <div className=" space-y-3">
-                <div className=" h-24 bg-muted/40 animate-pulse"></div>
-                <div className=" h-24  bg-muted/20 animate-pulse"></div>
-                <div className=" h-24 bg-muted/40  animate-pulse"></div>
-                <div className=" h-24 bg-muted/20 animate-pulse"></div>
-                <div className=" h-24 bg-muted/40  animate-pulse"></div>
-                <div className=" h-24 bg-muted/20 animate-pulse"></div>
+              <div>
+                <div className=" h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                <div className=" h-24  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                <div className=" h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                  <Key className="w-8 h-8 text-muted-foreground" />
-                </div>
                 <p className="text-muted-foreground text-lg mb-2">
                   {searchQuery
                     ? "No API keys match your search"

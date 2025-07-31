@@ -157,7 +157,9 @@ export default function BroadcastsPage() {
 
       const matchesStatus =
         statusFilter === "all" ||
-        (statusFilter === "completed" && progress === 100) ||
+        (statusFilter === "completed" &&
+          progress === 100 &&
+          broadcast?.failed == 0) ||
         (statusFilter === "processing" && broadcast?.processing > 0) ||
         (statusFilter === "pending" &&
           broadcast?.pending > 0 &&
@@ -231,7 +233,7 @@ export default function BroadcastsPage() {
                 placeholder="Search campaigns..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 custom-gradient2"
+                className="pl-10 custom-gradient2 placeholder:text-sm"
               />
             </div>
             <div className="flex gap-2 sm:gap-4">
@@ -261,12 +263,12 @@ export default function BroadcastsPage() {
           </div>
 
           <div className="rounded-lg border overflow-hidden">
-            <div className="hidden lg:grid grid-cols-11 gap-4 px-4 py-2 border-b text-muted-foreground text-sm font-bold custom-gradient2 hover:bg-transparent">
+            <div className="hidden lg:grid grid-cols-12 gap-4 px-4 py-2 border-b text-muted-foreground text-sm font-bold custom-gradient2 hover:bg-transparent">
               <div className="col-span-4">Campaign</div>
               <div className="col-span-2">Status</div>
               <div className="col-span-2">Recipients</div>
               <div className="col-span-2">Progress</div>
-              <div className="col-span-1">Created</div>
+              <div className="col-span-2">Created</div>
             </div>
 
             <div className="lg:hidden divide-y">
@@ -278,7 +280,7 @@ export default function BroadcastsPage() {
                         <div className="min-w-0 flex-1">
                           <Link
                             href={`/dashboard/broadcasts/${broadcast.batchId}`}
-                            className="underline underline-offset-2 group flex items-center gap-x-2"
+                            className=" underline-offset-2 hover:underline group flex items-center gap-x-2"
                           >
                             <p className="font-medium flex items-center gap-2 group truncate text-left text-sm">
                               {broadcast?.subject || "No subject"}
@@ -314,13 +316,13 @@ export default function BroadcastsPage() {
                   </div>
                 ))
               ) : isLoading ? (
-                <div className=" space-y-3">
-                  <div className=" h-24 bg-muted/40 animate-pulse"></div>
-                  <div className=" h-24  bg-muted/20 animate-pulse"></div>
-                  <div className=" h-24 bg-muted/40  animate-pulse"></div>
-                  <div className=" h-24 bg-muted/20 animate-pulse"></div>
-                  <div className=" h-24 bg-muted/40  animate-pulse"></div>
-                  <div className=" h-24 bg-muted/20 animate-pulse"></div>
+               <div>
+                  <div className=" h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className=" h-24  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-24 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className=" h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-24 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className=" h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -336,7 +338,7 @@ export default function BroadcastsPage() {
                   </p>
                   {!searchQuery && statusFilter === "all" && (
                     <Link href={"/dashboard/broadcasts/create"}>
-                      <Button className="custom-gradient">
+                      <Button size="sm" variant="grad">
                         <Plus className="w-4 h-4 mr-2" />
                         Create Your First Campaign
                       </Button>
@@ -351,7 +353,7 @@ export default function BroadcastsPage() {
                 filteredBroadcasts.map((broadcast: T_Broadcasts) => (
                   <div
                     key={broadcast.batchId}
-                    className="grid grid-cols-11 items-center gap-4 px-4 py-2 text-foreground/90 text-sm"
+                    className="grid grid-cols-12 items-center gap-4 px-4 py-2 text-foreground/90 text-sm"
                   >
                     <div className="col-span-4 flex items-center gap-3">
                       {getStatusIcon(broadcast.status)}
@@ -382,7 +384,7 @@ export default function BroadcastsPage() {
                         {getProgressText(broadcast)}
                       </span>
                     </div>
-                    <div className="col-span-1 flex items-center min-w-28">
+                    <div className="col-span-2 flex items-center min-w-28">
                       <span className="text-muted-foreground">
                         {formatDistanceToNowStrict(
                           new Date(broadcast.createdAt),
@@ -395,13 +397,13 @@ export default function BroadcastsPage() {
                   </div>
                 ))
               ) : isLoading ? (
-                <div className=" space-y-1">
-                  <div className=" h-12 bg-muted/40 animate-pulse"></div>
-                  <div className=" h-12 bg-muted/20 animate-pulse"></div>
-                  <div className=" h-12 bg-muted/40  animate-pulse"></div>
-                  <div className=" h-12 bg-muted/20 animate-pulse"></div>
-                  <div className=" h-12 bg-muted/40  animate-pulse"></div>
-                  <div className=" h-12 bg-muted/20 animate-pulse"></div>
+              <div>
+                  <div className=" h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className=" h-12  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className=" h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className=" h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -417,7 +419,7 @@ export default function BroadcastsPage() {
                   </p>
                   {!searchQuery && statusFilter === "all" && (
                     <Link href={"/dashboard/broadcasts/create"}>
-                      <Button className="custom-gradient">
+                      <Button size="sm" variant="grad">
                         <Plus className="w-4 h-4 mr-2" />
                         Create Your First Campaign
                       </Button>

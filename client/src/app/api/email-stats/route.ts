@@ -8,7 +8,7 @@ import { getAuthToken, verifyAuthToken } from "@/lib/auth-cookies";
 
 export async function GET() {
   try {
-    // ApiKey.countDocuments();
+    ApiKey.countDocuments();
     const token = await getAuthToken();
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

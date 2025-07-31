@@ -15,6 +15,7 @@ import {
   Code,
   MoreHorizontal,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import { copyToClipboard } from "@/app/helper/copy";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -122,11 +123,11 @@ export default function DomainDetailPage({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-pulse text-center">
-          <div className="h-4 w-24 sm:w-32 bg-gray-700 rounded mb-2 mx-auto" />
-          <div className="h-4 w-32 sm:w-48 bg-gray-700 rounded mx-auto" />
-        </div>
+      <div className="min-h-screen gap-x-2 app-gradient flex items-center justify-center p-4">
+        <p>
+          <Loader2 className=" animate-spin" />
+        </p>
+        <div className="text-foreground">Feteching Domain info..</div>
       </div>
     );
   }
@@ -171,7 +172,7 @@ export default function DomainDetailPage({
       });
       const data = await res.json();
       if (data.success) {
-        setDomain(data.domain);
+        router.push("/dashboard/domains");
       } else {
         setError(data.error || "Failed to fetch domain details");
       }
@@ -185,7 +186,6 @@ export default function DomainDetailPage({
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-12 h-12 sm:w-16 sm:h-16 custom-gradient5 rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -206,8 +206,7 @@ export default function DomainDetailPage({
               onClick={handleCheckStatus}
               disabled={refreshing}
               variant="outline"
-              className="custom-gradient bg-transparent h-9 px-3 sm:px-4"
-              size="sm"
+              className="custom-gradient bg-transparent "
             >
               <RefreshCw
                 className={`w-4 h-4 ${
@@ -216,11 +215,10 @@ export default function DomainDetailPage({
               />
               <span className=" text-xs">Refresh</span>
             </Button>
-            <Link target="_blank" href={"/docs/?to=broadcasts"}>
+            <Link target="_blank"  className=" hidden" href={"/docs/?to=domains"}>
               <Button
                 variant="outline"
-                className="custom-gradient bg-transparent h-9 px-3 sm:px-4 hidden sm:flex"
-                size="sm"
+                className="custom-gradient bg-transparent   hidden sm:flex"
               >
                 <Code className="w-4 h-4 mr-2" />
                 Docs
@@ -275,7 +273,6 @@ export default function DomainDetailPage({
           </div>
         </div>
 
-        {/* Domain Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
           <div>
             <div className="text-xs sm:text-sm text-muted-foreground mb-1">
@@ -295,7 +292,6 @@ export default function DomainDetailPage({
           </div>
         </div>
 
-        {/* Alerts */}
         {error && (
           <Alert className="bg-red-500/10 border border-red-500/30 text-red-400 mb-6 p-3 sm:p-4">
             <AlertDescription className="flex items-center gap-2 text-xs sm:text-sm">
@@ -314,8 +310,7 @@ export default function DomainDetailPage({
           </Alert>
         )}
 
-        {/* DNS Records Section */}
-        <div className="custom-gradient4 rounded-xl p-4 sm:p-6">
+        <div className="custom-gradient4 border-none rounded-xl ">
           <div className="mb-6 sm:mb-8">
             <div className="flex items-center gap-3 mb-4">
               <h3 className="text-base sm:text-lg font-medium">DKIM and SPF</h3>
@@ -323,41 +318,31 @@ export default function DomainDetailPage({
             </div>
 
             <div className="custom-gradient4 rounded-lg overflow-x-auto">
-              {/* Table Header */}
               <div className="hidden sm:grid grid-cols-8 gap-4 px-4 py-3 custom-gradient2 text-xs sm:text-sm font-medium text-gray-300 border-b border-gray-700">
+                <span className="col-span-2"> Name</span>
                 <span className="col-span-1">Type</span>
-                <span className="col-span-2">Host / Name</span>
                 <span className="col-span-4">Value</span>
                 <span className="col-span-1">Priority</span>
               </div>
 
-              {/* Mobile Card Layout / Desktop Table Rows */}
               {domain.dnsRecords.map((record, index) => (
                 <div
                   key={index}
-                  className="sm:grid sm:grid-cols-8 sm:gap-4 px-4 py-3 text-xs sm:text-sm border-b last:border-b-0 sm:hover:bg-gray-800/30 flex flex-col gap-2 sm:flex-row sm:items-center"
+                  className="sm:grid sm:grid-cols-8 sm:gap-4 px-4 py-3 text-xs sm:text-sm border-b last:border-b-0 dark:sm:hover:bg-gray-800/10 dark:text-muted-foreground text-gray-600 flex flex-col gap-2 sm:flex-row sm:items-center"
                 >
-                  <div className="sm:col-span-1 flex items-center gap-2 sm:gap-0">
-                    <span className="sm:hidden font-medium text-gray-400">
-                      Type:
-                    </span>
-                    <span className="text-yellow-400 font-mono">
-                      {record.type}
-                    </span>
-                  </div>
-                  <div className="sm:col-span-2 flex items-center gap-2 sm:gap-0">
-                    <span className="sm:hidden font-medium text-gray-400">
+                    <div className="sm:col-span-2 flex items-center gap-2 sm:gap-0">
+                    <span className="sm:hidden font-medium ">
                       Name:
                     </span>
                     <button
-                      className="flex items-center group gap-1 hover:text-blue-400 transition-colors"
+                      className="flex items-center group gap-1 "
                       onClick={() => {
                         copyToClipboard(record.name, "Name", false);
                         setCopyRecordId(`name-${index}`);
                         setTimeout(() => setCopyRecordId(""), 1000);
                       }}
                     >
-                      <span className="truncate max-w-[150px] sm:max-w-[120px] font-mono">
+                      <span className="truncate max-w-[150px] sm:max-w-[120px] font-mono hover:text-primary transition-colors">
                         {record.name}
                       </span>
                       <span className="group-hover:visible invisible">
@@ -369,19 +354,26 @@ export default function DomainDetailPage({
                       </span>
                     </button>
                   </div>
-                  <div className="sm:col-span-4 flex items-center gap-2 sm:gap-0">
-                    <span className="sm:hidden font-medium text-gray-400">
-                      Value:
+                  <div className="sm:col-span-1 flex items-center gap-2 sm:gap-0">
+                    <span className="sm:hidden font-medium ">
+                      Type:
                     </span>
+                    <span className="dark:text-yellow-400 text-yellow-700  font-mono">
+                      {record.type}
+                    </span>
+                  </div>
+                
+                  <div className="sm:col-span-4 flex items-center gap-2 sm:gap-0">
+                    <span className="sm:hidden font-medium ">Value:</span>
                     <button
-                      className="flex items-center group gap-1 hover:text-blue-400 transition-colors w-full text-left"
+                      className="flex items-center group gap-1  "
                       onClick={() => {
                         copyToClipboard(record.value, "Value", false);
                         setCopyRecordId(`value-${index}`);
                         setTimeout(() => setCopyRecordId(""), 1000);
                       }}
                     >
-                      <span className="truncate max-w-[200px] sm:max-w-[300px] font-mono text-gray-300">
+                      <span className="truncate max-w-[200px] sm:max-w-[300px] hover:text-blue-400 transition-colors font-mono ">
                         {record.value}
                       </span>
                       <span className="group-hover:visible invisible">
@@ -393,43 +385,19 @@ export default function DomainDetailPage({
                       </span>
                     </button>
                   </div>
-                  <div className="sm:col-span-1 flex items-center gap-2 sm:gap-0">
-                    <span className="sm:hidden font-medium text-gray-400">
-                      Priority:
-                    </span>
-                    <span className="text-gray-400">
-                      {record.priority || ""}
-                    </span>
-                  </div>
+                  {record?.priority && (
+                    <div className="sm:col-span-1 flex items-center gap-2 sm:gap-0">
+                      <span className="sm:hidden font-medium text-gray-400">
+                        Priority:
+                      </span>
+                      <span className="">{record.priority || ""}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* DMARC Section (Hidden) */}
-          <div className="hidden">
-            <div className="flex items-center gap-3 mb-4">
-              <h3 className="text-base sm:text-lg font-medium">DMARC</h3>
-              <Badge variant="grad">Recommended</Badge>
-            </div>
-            <div className="bg-gray-800/50 rounded-lg overflow-x-auto">
-              <div className="hidden sm:grid grid-cols-10 gap-4 px-4 py-3 bg-gray-800/80 text-xs sm:text-sm font-medium text-gray-300 border-b border-gray-700">
-                <span className="col-span-1">Type</span>
-                <span className="col-span-2">Host / Name</span>
-                <span className="col-span-5">Value</span>
-              </div>
-              <div className="sm:grid sm:grid-cols-10 sm:gap-4 px-4 py-3 text-xs sm:text-sm hover:bg-gray-800/30 flex flex-col gap-2">
-                <span className="sm:col-span-1 text-yellow-400 font-mono">
-                  TXT
-                </span>
-                <span className="sm:col-span-2 font-mono">_dmarc</span>
-                <span className="sm:col-span-5 text-gray-300 font-mono">
-                  v=DMARC1; p=none;
-                </span>
-                <span className="sm:col-span-2 text-gray-400">Auto</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

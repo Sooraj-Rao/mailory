@@ -237,7 +237,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:pt-10 flex justify-center">
+    <div className="min-h-screen py-4 sm:p-6 lg:pt-10 flex justify-center">
       <div className="max-w-7xl w-full">
         <div>
           <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -341,6 +341,7 @@ export default function SettingsPage() {
                     <Input
                       id="email"
                       type="email"
+                      disabled
                       value={profileData.email}
                       onChange={(e) =>
                         setProfileData({
@@ -353,18 +354,21 @@ export default function SettingsPage() {
                     />
                   </div>
                 </div>
-                <Button
-                  onClick={updateProfile}
-                  disabled={saving}
-                  className="w-full sm:w-auto text-sm"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  {saving ? "Saving..." : "Save Profile"}
-                </Button>
+                {(settings.profile.email !== profileData.email ||
+                  settings.profile.name !== profileData.name) && (
+                  <Button
+                    onClick={updateProfile}
+                    disabled={saving}
+                    className="w-full sm:w-auto text-sm"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {saving ? "Saving..." : "Save Profile"}
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
-            <Card className="bg-background/60 backdrop-blur border-border/50">
+            <Card className="bg-background/60 hidden backdrop-blur border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                   Change Password
@@ -509,7 +513,7 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-background/60 backdrop-blur border-border/50">
+            <Card className="bg-background/60 hidden backdrop-blur border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                   Notification Preferences

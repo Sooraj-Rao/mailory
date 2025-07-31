@@ -265,7 +265,7 @@ export default function EmailsPage() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 custom-gradient2"
+                className="pl-10 custom-gradient2 placeholder:text-sm"
               />
             </div>
             <div className="flex gap-2 sm:gap-4">
@@ -374,13 +374,13 @@ export default function EmailsPage() {
                   </div>
                 ))
               ) : isLoading ? (
-                <div className=" space-y-3">
-                  <div className=" h-24 bg-muted/40 animate-pulse"></div>
-                  <div className=" h-24  bg-muted/20 animate-pulse"></div>
-                  <div className=" h-24 bg-muted/40  animate-pulse"></div>
-                  <div className=" h-24 bg-muted/20 animate-pulse"></div>
-                  <div className=" h-24 bg-muted/40  animate-pulse"></div>
-                  <div className=" h-24 bg-muted/20 animate-pulse"></div>
+                <div>
+                  <div className=" h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className=" h-24  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-24 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className=" h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-24 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className=" h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -445,13 +445,13 @@ export default function EmailsPage() {
                   </div>
                 ))
               ) : isLoading ? (
-                <div className=" space-y-1">
-                  <div className=" h-12 bg-muted/40 animate-pulse"></div>
-                  <div className=" h-12 bg-muted/20 animate-pulse"></div>
-                  <div className=" h-12 bg-muted/40  animate-pulse"></div>
-                  <div className=" h-12 bg-muted/20 animate-pulse"></div>
-                  <div className=" h-12 bg-muted/40  animate-pulse"></div>
-                  <div className=" h-12 bg-muted/20 animate-pulse"></div>
+                <div>
+                  <div className=" h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className=" h-12  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className=" h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className=" h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">

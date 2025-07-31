@@ -156,10 +156,12 @@ export function CustomSidebar({ isOpen, onToggle }: CustomSidebarProps) {
                 align="end"
                 className="w-56 bg-popover border-border"
               >
-                <DropdownMenuItem className="text-muted-foreground hover:bg-accent/20">
-                  <Bug className="w-4 h-4 mr-2" />
-                  Report a Bug
-                </DropdownMenuItem>
+                <a target="_blank" href="https://contact.soorajrao.in/?querytype=report a issue&message=i want to reporta issue in mailory.site&utm_medium=mailory_sidebar&utm_source=mailory">
+                  <DropdownMenuItem className="text-muted-foreground hover:bg-accent/20">
+                    <Bug className="w-4 h-4 mr-2" />
+                    Report a Bug
+                  </DropdownMenuItem>
+                </a>
                 <ThemeToggle>
                   <DropdownMenuItem className="text-muted-foreground w-full hover:bg-accent/20">
                     <SunMoon className="w-4 h-4 mr-2" />

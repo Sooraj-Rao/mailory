@@ -13,6 +13,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { copyToClipboard } from "@/app/helper/copy";
+import { Badge } from "@/components/ui/badge";
 
 interface DNSRecord {
   name: string;
@@ -36,14 +37,12 @@ export default function AddDomainPage() {
   const [success, setSuccess] = useState("");
   const [copyRecordId, setCopyRecordId] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-  const [recordsAdded, setRecordsAdded] = useState(false);
 
   const handleAddDomain = async () => {
     setError("");
     setSuccess("");
     setDnsRecords([]);
     setStatus(null);
-    setRecordsAdded(false);
     setIsLoading(true);
 
     try {
@@ -107,7 +106,7 @@ export default function AddDomainPage() {
             <div className="flex items-center gap-2 sm:gap-4">
               <Button
                 onClick={handleCheckStatus}
-                disabled={refreshing || !domain || !recordsAdded}
+                disabled={refreshing || !domain}
                 variant="outline"
                 className="custom-gradient bg-transparent border-gray-700 hover:bg-gray-800"
                 size="sm"
@@ -122,8 +121,17 @@ export default function AddDomainPage() {
             </div>
           </div>
         </div>
-
         <div className="p-2 sm:p-6">
+          {status && (
+            <div>
+              <div className=" p-4 rounded-lg">
+                <h2 className="text-lg font-medium mb-2">Domain Status</h2>
+                <Badge variant={status.verified ? "green" : "red"}>
+                  {status.verified ? "Verified" : "Not verified"}
+                </Badge>
+              </div>
+            </div>
+          )}
           {error && (
             <Alert className="mb-4 sm:mb-6 border-red-500/50 bg-red-500/10 text-red-400">
               <AlertDescription className="flex items-center gap-3 text-sm">
@@ -141,7 +149,7 @@ export default function AddDomainPage() {
             </Alert>
           )}
 
-          <div className="mb-6">
+          <div className="mb-6 max-w-2xl">
             <div className="custom-gradient4 p-4 rounded-lg">
               <h2 className="text-lg font-medium mb-2">Domain</h2>
               <p className="text-sm text-gray-400 mb-2">Domain name</p>
@@ -167,135 +175,93 @@ export default function AddDomainPage() {
                   disabled={isLoading}
                 />
               </div>
-              <Button
-                size="sm"
-                variant="grad"
-                className=" mt-5"
-                onClick={handleAddDomain}
-                disabled={isLoading || !domain}
-              >
-                {isLoading ? "Adding..." : "Add Domain"}
-              </Button>
+              {dnsRecords.length == 0 && (
+                <Button
+                  size="sm"
+                  className=" mt-5"
+                  onClick={handleAddDomain}
+                  disabled={isLoading || !domain}
+                >
+                  {isLoading ? "Adding..." : "Add Domain"}
+                </Button>
+              )}
             </div>
           </div>
+          {dnsRecords?.length !== 0 && (
+            <div className="custom-gradient4 rounded-lg overflow-x-auto">
+              <div className="hidden sm:grid grid-cols-8 gap-4 px-4 py-3 custom-gradient2 text-xs sm:text-sm font-medium text-gray-300 border-b border-gray-700">
+                <span className="col-span-2"> Name</span>
+                <span className="col-span-1">Type</span>
+                <span className="col-span-4">Value</span>
+                <span className="col-span-1">Priority</span>
+              </div>
 
-          {dnsRecords.length > 0 && (
-            <div className="mb-6">
-              <div className="p-4 rounded-lg">
-                <h2 className="text-lg font-medium mb-2 flex items-center justify-between">
-                  DNS Records
-                </h2>
-                <div className="mb-4">
-                  <div className="flex items-center gap-2 text-gray-400 mb-2">
-                    <span className="bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded text-xs">
-                      Required
-                    </span>
-                    <span>DKIM and SPF</span>
-                    <span className="text-gray-500">
-                      Enable email signing and specify authorized senders.
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-5 gap-2 text-sm p-2 rounded">
-                    <div className="col-span-1 font-medium">Type</div>
-                    <div className="col-span-1 font-medium">Host / Name</div>
-                    <div className="col-span-2 font-medium">Value</div>
-                    <div className="col-span-1 font-medium">Priority</div>
-                    <div className="col-span-1 font-medium">Status</div>
-                  </div>
-                  {dnsRecords.map((rec, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-5 gap-2 text-sm p-2 hover:bg-gray-700/50"
-                    >
-                      <div className="col-span-1">{rec.type}</div>
-                      <div className="col-span-1 truncate">
-                        <button
-                          disabled={copyRecordId !== ""}
-                          onClick={() => {
-                            copyToClipboard(rec.name, "DNS Record Name", false);
-                            setCopyRecordId(String(index));
-                            setTimeout(() => setCopyRecordId(""), 1000);
-                          }}
-                          className="font-medium flex items-center gap-2 group underline hover:decoration-green-400 decoration-dotted underline-offset-2 truncate text-white"
-                        >
-                          <span className="truncate">{rec.name}</span>
-                          {copyRecordId === String(index) ? (
-                            <Check size={12} className="text-green-500" />
-                          ) : (
-                            <Copy
-                              size={12}
-                              className="group-hover:visible invisible"
-                            />
-                          )}
-                        </button>
-                      </div>
-                      <div className="col-span-2 truncate">
-                        <button
-                          disabled={copyRecordId !== ""}
-                          onClick={() => {
-                            copyToClipboard(
-                              rec.value,
-                              "DNS Record Value",
-                              false
-                            );
-                            setCopyRecordId(String(index));
-                            setTimeout(() => setCopyRecordId(""), 1000);
-                          }}
-                          className="font-medium flex items-center gap-2 group underline hover:decoration-green-400 decoration-dotted underline-offset-2 truncate text-white"
-                        >
-                          <span className="truncate">{rec.value}</span>
-                          {copyRecordId === String(index) ? (
-                            <Check size={12} className="text-green-500" />
-                          ) : (
-                            <Copy
-                              size={12}
-                              className="group-hover:visible invisible"
-                            />
-                          )}
-                        </button>
-                      </div>
-                      <div className="col-span-1">{rec.priority ?? "Auto"}</div>
-                      <div className="col-span-1 text-red-500">Failed</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2 text-gray-400 mb-2 mt-4">
-                  <span className="bg-blue-500/20 text-blue-500 px-2 py-1 rounded text-xs">
-                    Recommended
-                  </span>
-                  <span>DMARC</span>
-                  <span className="text-gray-500">
-                    Set authentication policies and receive reports.
-                  </span>
-                </div>
-                <div className="grid grid-cols-5 gap-2 text-sm p-2 rounded">
-                  <div className="col-span-1">TXT</div>
-                  <div className="col-span-1 truncate">_dmarc</div>
-                  <div className="col-span-2 truncate">v=DMARC1; p=none;</div>
-                  <div className="col-span-1">Auto</div>
-                  <div className="col-span-1 text-red-500">Failed</div>
-                </div>
-                <Button
-                  onClick={() => setRecordsAdded(true)}
-                  disabled={!dnsRecords.length || recordsAdded}
-                  className="mt-4 custom-gradient bg-green-600 hover:bg-green-700"
+              {dnsRecords.map((record, index) => (
+                <div
+                  key={index}
+                  className="sm:grid sm:grid-cols-8 sm:gap-4 px-4 py-3 text-xs sm:text-sm border-b last:border-b-0 dark:sm:hover:bg-gray-800/10 dark:text-muted-foreground text-gray-600 flex flex-col gap-2 sm:flex-row sm:items-center"
                 >
-                  I&apos;ve added the records
-                </Button>
-              </div>
-            </div>
-          )}
+                  <div className="sm:col-span-2 flex items-center gap-2 sm:gap-0">
+                    <span className="sm:hidden font-medium ">Name:</span>
+                    <button
+                      className="flex items-center group gap-1 "
+                      onClick={() => {
+                        copyToClipboard(record.name, "Name", false);
+                        setCopyRecordId(`name-${index}`);
+                        setTimeout(() => setCopyRecordId(""), 1000);
+                      }}
+                    >
+                      <span className="truncate max-w-[150px] sm:max-w-[120px] font-mono hover:text-primary transition-colors">
+                        {record.name}
+                      </span>
+                      <span className="group-hover:visible invisible">
+                        {copyRecordId === `name-${index}` ? (
+                          <Check className="h-3 w-3 text-green-400" />
+                        ) : (
+                          <Copy className="h-3 w-3 text-gray-500" />
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                  <div className="sm:col-span-1 flex items-center gap-2 sm:gap-0">
+                    <span className="sm:hidden font-medium ">Type:</span>
+                    <span className="dark:text-yellow-400 text-yellow-700  font-mono">
+                      {record.type}
+                    </span>
+                  </div>
 
-          {status && (
-            <div className="mb-6">
-              <div className="bg-gray-800 p-4 rounded-lg">
-                <h2 className="text-lg font-medium mb-2">Domain Status</h2>
-                <div className="text-sm text-gray-400">
-                  <p>Created: 1 minute ago</p>
-                  <p>Status: {status.verified ? "Verified" : "Failed"}</p>
-                  <p>Region: Tokyo (ap-northeast-1)</p>
+                  <div className="sm:col-span-4 flex items-center gap-2 sm:gap-0">
+                    <span className="sm:hidden font-medium ">Value:</span>
+                    <button
+                      className="flex items-center group gap-1  "
+                      onClick={() => {
+                        copyToClipboard(record.value, "Value", false);
+                        setCopyRecordId(`value-${index}`);
+                        setTimeout(() => setCopyRecordId(""), 1000);
+                      }}
+                    >
+                      <span className="truncate max-w-[200px] sm:max-w-[300px] hover:text-blue-400 transition-colors font-mono ">
+                        {record.value}
+                      </span>
+                      <span className="group-hover:visible invisible">
+                        {copyRecordId === `value-${index}` ? (
+                          <Check className="h-3 w-3 text-green-400 flex-shrink-0" />
+                        ) : (
+                          <Copy className="h-3 w-3 text-gray-500 flex-shrink-0" />
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                  {record?.priority && (
+                    <div className="sm:col-span-1 flex items-center gap-2 sm:gap-0">
+                      <span className="sm:hidden font-medium text-gray-400">
+                        Priority:
+                      </span>
+                      <span className="">{record.priority || ""}</span>
+                    </div>
+                  )}
                 </div>
-              </div>
+              ))}
             </div>
           )}
         </div>

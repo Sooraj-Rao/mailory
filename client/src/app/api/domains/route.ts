@@ -120,7 +120,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Domain not found" }, { status: 404 });
     }
     return NextResponse.json(
-      { error: "Successfully deleted the domain" },
+      { success: true, message: "Successfully deleted the domain" },
       { status: 200 }
     );
   } catch (error) {

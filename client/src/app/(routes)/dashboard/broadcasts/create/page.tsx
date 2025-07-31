@@ -223,13 +223,8 @@ export default function CreateBroadcastPage() {
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <Card className="custom-gradient3 hover:bg-transparent">
-              <CardHeader>
-                <CardTitle className="text-foreground">
-                  Campaign Details
-                </CardTitle>
-              </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6 mt-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="from" className="text-foreground">
@@ -301,7 +296,7 @@ export default function CreateBroadcastPage() {
                             size="sm"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={uploadingFile || loading}
-                            className="custom-gradient3 bg-transparent"
+                            className="custom-gradient1 bg-transparent mt-2 sm:mt-0"
                           >
                             <Upload
                               className={`w-4 h-4 mr-2 ${
@@ -318,6 +313,11 @@ export default function CreateBroadcastPage() {
                         )}
                       </div>
                     </div>
+                    <div className=" flex sm:justify-end justify-start">
+                      <span className="text-xs  text-muted-foreground">
+                        Supports CSV and Excel files
+                      </span>
+                    </div>
                     <Textarea
                       id="recipients"
                       value={recipients}
@@ -329,9 +329,6 @@ export default function CreateBroadcastPage() {
                     />
                     <div className="flex flex-col sm:flex-row sm:justify-between text-sm text-muted-foreground gap-1">
                       <span>{recipientCount} recipients</span>
-                      <span className="text-xs">
-                        Supports CSV and Excel files
-                      </span>
                     </div>
                   </div>
                   <Tabs defaultValue="html" className="w-full">
@@ -376,7 +373,7 @@ export default function CreateBroadcastPage() {
 
                   <Button
                     size="sm"
-                    variant="grad"
+                    
                     type="submit"
                     disabled={loading || uploadingFile}
                   >

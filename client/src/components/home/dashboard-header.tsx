@@ -6,7 +6,7 @@ import { Logo } from "./sidebar";
 
 const DashboardHeader = ({ onToggle }: { onToggle: () => void }) => {
   return (
-    <div className=" h-16 sticky z-[99] top-0 bg-background flex justify-between items-center text-sm  md:px-10 px-6  w-full border-b">
+    <div className=" h-16 sticky z-[50] top-0 bg-background flex justify-between items-center text-sm  md:px-10 px-6  w-full border-b">
       <div className=" md:opacity-0">
         <Logo />
       </div>

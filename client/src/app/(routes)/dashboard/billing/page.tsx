@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Crown, Zap, Users, Star, Loader2 } from "lucide-react";
+import { Check, Crown, Loader2 } from "lucide-react";
 import { useZustandStore } from "@/zustand/store";
 import { SUBSCRIPTION_PLANS } from "@/components/payment/subscription-modal";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -130,32 +130,6 @@ export default function BillingPage() {
     }
   };
 
-  const getPlanIcon = (planId: string) => {
-    switch (planId) {
-      case "free":
-        return <Users className="w-4 h-4 sm:w-5 sm:h-5" />;
-      case "pro":
-        return <Zap className="w-4 h-4 sm:w-5 sm:h-5" />;
-      case "premium":
-        return <Star className="w-4 h-4 sm:w-5 sm:h-5" />;
-      default:
-        return <Users className="w-4 h-4 sm:w-5 sm:h-5" />;
-    }
-  };
-
-  const getPlanColor = (planId: string) => {
-    switch (planId) {
-      case "free":
-        return "from-gray-500 to-gray-600";
-      case "pro":
-        return "from-purple-500 to-purple-600";
-      case "premium":
-        return "from-yellow-500 to-yellow-600";
-      default:
-        return "from-gray-500 to-gray-600";
-    }
-  };
-
   const getUsagePercentage = (used: number, limit: number) => {
     return Math.min((used / limit) * 100, 100);
   };
@@ -174,10 +148,10 @@ export default function BillingPage() {
   const currentPlan = SUBSCRIPTION_PLANS[subscription.plan];
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:pt-10 flex justify-center">
+    <div className="min-h-screen py-4  sm:p-6 lg:pt-10 flex justify-center">
       <div className="w-full max-w-7xl">
         <div>
-          <div className="border-b border-border/40 bg-background/80 backdrop-blur-sm">
+          <div className=" bg-background/80 backdrop-blur-sm">
             <div className="flex h-14 sm:h-16 items-center px-4 sm:px-6">
               <div className="flex items-center gap-3 ml-4">
                 <div>
@@ -208,16 +182,6 @@ export default function BillingPage() {
                 <CardHeader className="pb-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div
-                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${getPlanColor(
-                          subscription.plan
-                        )} flex items-center justify-center`}
-                      >
-                        {getPlanIcon(subscription.plan)}
-                        <span className="text-white text-xs font-medium ml-1">
-                          {subscription.plan.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
                       <div>
                         <h2 className="text-xl sm:text-2xl font-bold text-foreground">
                           {currentPlan.name} Plan
@@ -363,101 +327,116 @@ export default function BillingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {Object.values(SUBSCRIPTION_PLANS).map((plan) => (
-                    <div
-                      key={plan.id}
-                      className={`relative p-4 sm:p-6 rounded-xl border transition-all duration-200 hover:shadow-lg ${
-                        subscription.plan === plan.id
-                          ? "border-primary bg-primary/5 shadow-md"
-                          : "border-border/40 bg-background/40 hover:bg-background/60"
-                      }`}
-                    >
-                      {subscription.plan === plan.id && (
-                        <div className="absolute -top-2 -right-2">
-                          <Badge className="bg-primary text-primary-foreground text-xs">
-                            Current
-                          </Badge>
-                        </div>
-                      )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Object.values(SUBSCRIPTION_PLANS).map((plan) => {
+                    const isCurrent = subscription.plan === plan.id;
+                    const isFree = plan.id === "free";
+                    const isLoading = loading === plan.id;
 
-                      <div className="text-center space-y-4">
-                        <div
-                          className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-xl bg-gradient-to-br ${getPlanColor(
-                            plan.id
-                          )} flex items-center justify-center`}
-                        >
-                          {getPlanIcon(plan.id)}
-                          <span className="text-white text-xs font-medium ml-1">
-                            {plan.id.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
+                    return (
+                      <div
+                        key={plan.id}
+                        className={`relative p-6 rounded-2xl border transition-all duration-200 hover:shadow-md ${
+                          isCurrent
+                            ? "border-primary bg-primary/5 shadow-lg"
+                            : "border-border/30 bg-background hover:bg-muted/40"
+                        }`}
+                      >
+                        {isCurrent && (
+                          <div className="absolute -top-2 -right-2">
+                            <Badge className="bg-primary text-primary-foreground text-[10px] px-2 py-1 rounded-full shadow">
+                              Current
+                            </Badge>
+                          </div>
+                        )}
 
-                        <div>
-                          <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                        <div className="text-center space-y-3">
+                          <h3 className="text-lg font-semibold text-foreground">
                             {plan.name}
                           </h3>
-                          <div className="text-xl sm:text-2xl font-bold text-foreground mt-1">
-                            ₹{plan.price}
+                          <div className="text-2xl font-bold text-foreground">
+                            ₹{plan.price ?? "Custom"}
                           </div>
-                          <p className="text-xs sm:text-sm text-muted-foreground">
-                            {plan.price === 0 ? "forever" : "per month"}
+                          <p className="text-sm text-muted-foreground">
+                            {plan.price === 0
+                              ? "forever"
+                              : plan.price
+                              ? "per month"
+                              : "based on usage"}
                           </p>
                         </div>
 
-                        <div className="space-y-2 text-xs sm:text-sm">
-                          <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">
-                              Monthly
-                            </span>
-                            <span className="font-medium">
-                              {plan.monthlyLimit.toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Daily</span>
-                            <span className="font-medium">
-                              {plan.dailyLimit}
-                            </span>
-                          </div>
-                        </div>
-
-                        {subscription.plan === plan.id ? (
-                          <Button
-                            variant="grad"
-                            disabled
-                            className="w-full bg-transparent text-xs sm:text-sm"
-                          >
-                            Current Plan
-                          </Button>
-                        ) : plan.id === "free" ? (
-                          <Button
-                            variant="outline"
-                            disabled
-                            className="w-full bg-transparent text-xs sm:text-sm"
-                          >
-                            Not Available
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="grad"
-                            onClick={() => handleUpgrade(plan.id)}
-                            disabled={loading !== ""}
-                            className="w-full  text-xs sm:text-sm"
-                          >
-                            {loading === plan.id ? (
-                              "Processing..."
-                            ) : (
-                              <>
-                                <Crown className="w-4 h-4 mr-2" />
-                                Upgrade
-                              </>
+                        {(plan.monthlyLimit || plan.dailyLimit) && (
+                          <div className="space-y-2 text-sm mt-4">
+                            {plan.monthlyLimit && (
+                              <div className="flex items-center justify-between text-muted-foreground">
+                                <span>Monthly</span>
+                                <span className="font-medium text-foreground">
+                                  {plan.monthlyLimit.toLocaleString()} emails
+                                </span>
+                              </div>
                             )}
-                          </Button>
+                            {plan.dailyLimit  && (
+                              <div className="flex items-center justify-between text-muted-foreground">
+                                <span>Daily</span>
+                                <span className="font-medium text-foreground">
+                                  {plan.dailyLimit} emails
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         )}
+
+                        {Array.isArray(plan.features) && (
+                          <ul className="mt-4 space-y-2 hidden text-sm">
+                            {plan.features.map((feature, i) => (
+                              <li
+                                key={i}
+                                className="flex items-center gap-2 text-foreground"
+                              >
+                                <Check className="w-4 h-4 text-green-500" />
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        <div className="mt-6">
+                          {isCurrent ? (
+                            <Button
+                              disabled
+                              className="w-full bg-muted/30 text-muted-foreground text-sm"
+                            >
+                              Current Plan
+                            </Button>
+                          ) : isFree ? (
+                            <Button
+                              variant="outline"
+                              disabled
+                              className="w-full text-muted-foreground text-sm"
+                            >
+                              Not Available
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={() => handleUpgrade(plan.id)}
+                              disabled={loading !== ""}
+                              className="w-full text-sm flex items-center justify-center gap-2"
+                            >
+                              {isLoading ? (
+                                "Processing..."
+                              ) : (
+                                <>
+                                  <Crown className="w-4 h-4" />
+                                  Upgrade
+                                </>
+                              )}
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

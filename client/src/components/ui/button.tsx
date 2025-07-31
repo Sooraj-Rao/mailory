@@ -19,7 +19,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent dark:hover:bg-accent/40 hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        grad:'bg-gradient-to-t dark:from-primary/20 dark:to-primary/60  to-primary/70 from-primary text-white'
+        grad:'bg-gradient-to-t text-sm dark:from-primary/20 dark:to-primary/60  to-primary/70 from-primary text-white'
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -29,8 +29,8 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: "grad",
+      size: "sm",
     },
   }
 );

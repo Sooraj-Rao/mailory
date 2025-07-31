@@ -93,7 +93,7 @@ export default function DocsPage() {
                     </Button>
                   </Link>
                   <Link href="/register">
-                    <Button variant="grad" size="sm">
+                    <Button  size="sm">
                       Get Started
                     </Button>
                   </Link>
@@ -175,7 +175,7 @@ export default function DocsPage() {
                         </p>
                       </div>
                       <Link href="/dashboard/api-keys">
-                        <Button variant="grad" size="sm">
+                        <Button  size="sm">
                           Create API Key
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
@@ -219,12 +219,12 @@ export default function DocsPage() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm sm:text-base text-muted-foreground">
-                      Include your API key in the Authorization header of every
+                      Include your API key in the mailory-authorization header of every
                       request:
                     </p>
 
                     <CodeBlock
-                      code={`Authorization: Bearer YOUR_API_KEY`}
+                      code={`mailory-authorization: Bearer YOUR_API_KEY`}
                       language="HTTP Header"
                     />
 
@@ -392,7 +392,7 @@ export default function DocsPage() {
                               : APP_URL
                           }/api/emails \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "mailory-authorization: Bearer YOUR_API_KEY" \\
   -d '{
     "to": "user@example.com",
     "subject": "Welcome to our service!",
@@ -415,7 +415,7 @@ export default function DocsPage() {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer YOUR_API_KEY'
+    'mailory-authorization': 'Bearer YOUR_API_KEY'
   },
   body: JSON.stringify({
     to: 'user@example.com',
@@ -445,7 +445,7 @@ url = "${
 
 headers = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer YOUR_API_KEY"
+    "mailory-authorization": "Bearer YOUR_API_KEY"
 }
 
 data = {
@@ -484,7 +484,7 @@ $options = [
     'http' => [
         'header' => [
             'Content-Type: application/json',
-            'Authorization: Bearer YOUR_API_KEY'
+            'mailory-authorization: Bearer YOUR_API_KEY'
         ],
         'method' => 'POST',
         'content' => json_encode($data)
@@ -682,7 +682,7 @@ echo $response;
                               : APP_URL
                           }/api/broadcasts \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "mailory-authorization: Bearer YOUR_API_KEY" \\
   -d '{
     "recipients": [
       "user1@example.com",
@@ -709,7 +709,7 @@ echo $response;
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer YOUR_API_KEY'
+    'mailory-authorization': 'Bearer YOUR_API_KEY'
   },
   body: JSON.stringify({
     recipients: [
@@ -743,7 +743,7 @@ url = "${
 
 headers = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer YOUR_API_KEY"
+    "mailory-authorization": "Bearer YOUR_API_KEY"
 }
 
 data = {
@@ -790,7 +790,7 @@ $options = [
     'http' => [
         'header' => [
             'Content-Type: application/json',
-            'Authorization: Bearer YOUR_API_KEY'
+            'mailory-authorization: Bearer YOUR_API_KEY'
         ],
         'method' => 'POST',
         'content' => json_encode($data)
@@ -1016,7 +1016,7 @@ Content-Type: application/json
                       </h4>
                       <CodeBlock
                         code={`{
-  "error": "Invalid or missing Authorization header. Use 'Bearer {api_key}'"
+  "error": "Invalid or missing mailory-authorization header. Use 'Bearer {api_key}'"
 }`}
                         language="json"
                       />
@@ -1131,7 +1131,7 @@ Content-Type: application/json
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer YOUR_API_KEY'
+        'mailory-authorization': 'Bearer YOUR_API_KEY'
       },
       body: JSON.stringify(emailData)
     });
@@ -1180,7 +1180,7 @@ def send_email(email_data, max_retries=3):
     url = "/api/emails"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_API_KEY"
+        "mailory-authorization": "Bearer YOUR_API_KEY"
     }
     
     for attempt in range(max_retries):
@@ -1229,7 +1229,7 @@ function send_email($email_data, $max_retries = 3) {
     $url = "/api/emails";
     $headers = [
         "Content-Type: application/json",
-        "Authorization: Bearer YOUR_API_KEY"
+        "mailory-authorization: Bearer YOUR_API_KEY"
     ];
 
     for ($attempt = 1; $attempt <= $max_retries; $attempt++) {

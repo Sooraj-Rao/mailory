@@ -102,7 +102,7 @@ export function getApiKeyError() {
   return NextResponse.json(
     {
       error: "Invalid or missing API key",
-      message: "Please provide a valid API key in the Authorization header",
+      message: "Please provide a valid API key in the mailory-authorization header",
     },
     { status: 401 }
   );

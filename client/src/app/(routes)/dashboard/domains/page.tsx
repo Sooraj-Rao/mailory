@@ -153,7 +153,7 @@ export default function DomainPage() {
               </div>
               <div className="flex items-center gap-2 sm:gap-4">
                 <Link href="/dashboard/domains/add">
-                  <Button variant="grad" size="sm">
+                  <Button size="sm">
                     <Plus className="w-4 h-4 sm:mr-2" />
                     Add Domain
                   </Button>
@@ -183,7 +183,7 @@ export default function DomainPage() {
               (d) => !d.verified && d.dkimStatus !== "configured"
             ) && (
               <Alert className="mb-4 sm:mb-6 border-yellow-500/50 bg-yellow-500/10 text-yellow-400">
-                <AlertDescription className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 text-sm">
+                <AlertDescription className="flex items-center gap-2 sm:gap-3 text-sm">
                   <AlertTriangle className="h-4 w-4 flex-shrink-0" />
                   <span>
                     Some domains are not verified. Please check their DNS
@@ -239,7 +239,7 @@ export default function DomainPage() {
                         <div className="min-w-0 flex-1">
                           <Link
                             href={`/dashboard/domains/${domain.id}`}
-                            className="font-medium flex items-center gap-2 group underline   underline-offset-2 truncate"
+                            className="font-medium flex items-center gap-2 group hover:underline   underline-offset-2 truncate"
                           >
                             <span className="truncate">{domain.domain}</span>
                             <ExternalLink
@@ -263,16 +263,17 @@ export default function DomainPage() {
                     </div>
                     <div className="">
                       <p className="text-sm text-muted-foreground/90 font-medium truncate">
-                        Mail from: {domain.mailFromDomain || "N/A"}
+                        <span className=" font-bold">MAIL FROM: </span>
+                        {domain.mailFromDomain || "N/A"}
                       </p>
                     </div>
                   </div>
                 ))
               ) : isLoading ? (
-                <div className="space-y-3">
-                  <div className="h-24 bg-muted/40 animate-pulse"></div>
-                  <div className="h-24 bg-muted/20 animate-pulse"></div>
-                  <div className="h-24 bg-muted/40 animate-pulse"></div>
+                <div>
+                  <div className=" h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className=" h-24  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-24 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -326,10 +327,10 @@ export default function DomainPage() {
                   </div>
                 ))
               ) : isLoading ? (
-                <div className="space-y-1">
-                  <div className="h-12 bg-muted/40 animate-pulse"></div>
-                  <div className="h-12 bg-muted/20 animate-pulse"></div>
-                  <div className="h-12 bg-muted/40 animate-pulse"></div>
+                <div>
+                  <div className=" h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className=" h-12  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
