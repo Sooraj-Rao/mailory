@@ -53,6 +53,7 @@ export default function CodeBlock({
           fontSize: "13px",
           margin: 0,
           overflowX: "auto",
+          background: theme === "light" ? "#ececec" : "#060606",
           whiteSpace: "pre-wrap",
           wordBreak: "break-word",
         }}

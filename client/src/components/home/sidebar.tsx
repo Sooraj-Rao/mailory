@@ -73,7 +73,7 @@ export function CustomSidebar({ isOpen, onToggle }: CustomSidebarProps) {
   const logout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/");
+      router.push("/home");
     } catch {
       console.error("Logout failed");
     }
@@ -189,7 +189,9 @@ export function CustomSidebar({ isOpen, onToggle }: CustomSidebarProps) {
 }
 
 export const Logo = () => (
-  <h2 className="text-2xl font-bold bg-gradient-to-r  to-blue-500 from-blue-950/90  via-blue-800 bg-clip-text text-transparent select-none">
-    Mailory
-  </h2>
+  <Link href={'/home'}>
+    <h2 className="text-2xl font-bold bg-gradient-to-r  to-blue-500 from-blue-950/90  via-blue-800 bg-clip-text text-transparent select-none">
+      Mailory
+    </h2>
+  </Link>
 );

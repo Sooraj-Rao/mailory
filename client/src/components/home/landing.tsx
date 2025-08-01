@@ -1,6 +1,6 @@
 "use client";
-
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,8 +38,7 @@ const languages = [
 ];
 
 const codeExamples = {
-  javascript: `
-const response = await fetch('https://mailory.site/api/emails', {
+  javascript: `const response = await fetch('https://mailory.site/api/emails', {
   method: 'POST',
   headers: {
     'mailory-authorization': 'Bearer API_KEY',
@@ -114,14 +113,12 @@ func main() {
 import java.net.URI;
 
 HttpClient client = HttpClient.newHttpClient();
-String json = """
-{
+String json = """{
   "from": "Mailory <app@mailory.site>",
   "to": "user@example.com", 
   "subject": "Welcome to our platform",
   "html": "<h1>Welcome!</h1><p>Thanks for joining us.</p>"
-}
-""";
+}""";
 
 HttpRequest request = HttpRequest.newBuilder()
   .uri(URI.create("https://mailory.site/api/emails"))
@@ -131,9 +128,72 @@ HttpRequest request = HttpRequest.newBuilder()
   .build();`,
 };
 
+const fadeInUp = {
+  initial: { opacity: 0, y: 60 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: "easeOut" },
+};
+
+const fadeIn = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.8 },
+};
+
+const slideInLeft = {
+  initial: { opacity: 0, x: -60 },
+  animate: { opacity: 1, x: 0 },
+  transition: { duration: 0.6, ease: "easeOut" },
+};
+
+const slideInRight = {
+  initial: { opacity: 0, x: 60 },
+  animate: { opacity: 1, x: 0 },
+  transition: { duration: 0.6, ease: "easeOut" },
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const staggerItem = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 },
+};
+
+const useTorchCursor = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  const updateMousePosition = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setMousePosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  return {
+    mousePosition,
+    isHovering,
+    setIsHovering,
+    updateMousePosition,
+  };
+};
+
 export default function LandingPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [copied, setCopied] = useState(false);
+
+  const { mousePosition, isHovering, setIsHovering, updateMousePosition } =
+    useTorchCursor();
 
   const copyToClipboard = async () => {
     await navigator.clipboard.writeText(
@@ -146,22 +206,66 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-600/30 to-pink-600/30 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-600/30 to-cyan-600/30 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "2s" }}
+        <motion.div
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-600/30 to-pink-600/30 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+          }}
         />
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "4s" }}
+        <motion.div
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-600/30 to-cyan-600/30 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.5, 0.3, 0.5],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+            delay: 2,
+          }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 rounded-full blur-3xl"
+          animate={{
+            rotate: [0, 360],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "linear",
+          }}
         />
       </div>
 
-      <nav className="relative z-50 border-b border-white/5 backdrop-blur-2xl bg-black/50">
+      <motion.nav
+        className="relative z-50 border-b border-white/5 backdrop-blur-2xl bg-black/50"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            <Logo />
-            <div className="hidden md:flex items-center space-x-8">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <Logo />
+            </motion.div>
+            <motion.div
+              className="hidden md:flex items-center space-x-8"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
               <Link
                 href="/docs"
                 className="text-gray-400 hover:text-white transition-all duration-300 hover:scale-105"
@@ -170,69 +274,121 @@ export default function LandingPage() {
                   Documentation
                 </Button>
               </Link>
-
               <Link href="/register">
                 <Button size="lg">
                   <span className="relative z-10">Get Started</span>
                 </Button>
               </Link>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       <section className="relative z-10 max-w-7xl mx-auto px-6 pt-20 pb-32">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <div className="space-y-6 ">
-              <div className="md:text-8xl sm:text-6xl text-3xl  font-black leading-none tracking-tight">
-                <div className="bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent">
+          <motion.div
+            className="space-y-8"
+            initial="initial"
+            animate="animate"
+            variants={staggerContainer}
+          >
+            <motion.div className="space-y-6" variants={staggerItem}>
+              <motion.div
+                className="md:text-8xl sm:text-6xl text-3xl font-black leading-none tracking-tight"
+                variants={fadeInUp}
+              >
+                <motion.div
+                  className="bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                >
                   Simple Email
-                </div>
-                <div className="flex items-center gap-4 mt-2">
+                </motion.div>
+                <motion.div
+                  className="flex items-center gap-4 mt-2"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                >
                   <span className="text-gray-400">for</span>
-                  <span
-                    className={`bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent transition-all duration-500 `}
-                  >
+                  <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent transition-all duration-500">
                     Developers
                   </span>
-                </div>
-              </div>
-
-              <p className="md:text-xl text-sm text-wrap text-gray-300 leading-relaxed max-w-lg">
+                </motion.div>
+              </motion.div>
+              <motion.p
+                className="md:text-xl text-sm text-wrap text-gray-300 leading-relaxed max-w-lg"
+                variants={fadeInUp}
+                transition={{ delay: 0.6 }}
+              >
                 Send transactional and broadcast emails easily, with support for
                 custom domains to maintain your brand.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4">
+              </motion.p>
+            </motion.div>
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4"
+              variants={staggerItem}
+              transition={{ delay: 0.8 }}
+            >
               <Link href="/register">
-                <Button
-                  size="lg"
-                  className=" scale-90 sm:scale-100  text-sm sm:text-lg px-8 py-6  hover:shadow-blue-500/25 transition-all duration-300 group"
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  Start Building
-                  <ArrowRight className="ml-2 h-5 w-5  group-hover:translate-x-1 transition-transform" />
-                </Button>
+                  <Button
+                    size="lg"
+                    className="scale-90 sm:scale-100 text-sm sm:text-lg px-8 py-6 hover:shadow-blue-500/25 transition-all duration-300 group"
+                  >
+                    Start Building
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </motion.div>
               </Link>
               <Link href="/docs">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-gray-600 text-sm sm:text-lg scale-90 sm:scale-100 px-8 py-6 bg-black/50 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <Code className="mr-2 hidden h-5 w-5" />
-                  Documentation
-                </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-gray-600 text-sm sm:text-lg scale-90 sm:scale-100 px-8 py-6 bg-black/50 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                  >
+                    <Code className="mr-2 hidden h-5 w-5" />
+                    Documentation
+                  </Button>
+                </motion.div>
               </Link>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
-          <div className="relative flex flex-col items-center gap-10 h-96 lg:h-[600px] perspective-1000">
-            <div className="sm:absolute w-72 h-44 top-[10%]  left-20 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl transition-all duration-1000 hover:scale-105 cursor-pointer">
+          <motion.div
+            className="relative flex flex-col items-center gap-10 h-96 lg:h-[600px] perspective-1000"
+            initial="initial"
+            animate="animate"
+            variants={staggerContainer}
+          >
+            <motion.div
+              className="sm:absolute w-72 h-44 top-[10%] left-20 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl cursor-pointer"
+              variants={slideInLeft}
+              whileHover={{
+                scale: 1.05,
+                rotateY: 5,
+                transition: { duration: 0.3 },
+              }}
+              animate={{
+                y: [0, -10, 0],
+                transition: {
+                  duration: 4,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                },
+              }}
+            >
               <div className="p-6 h-full flex flex-col justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10  rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center">
                     <Mail className="h-5 w-5 text-white" />
                   </div>
                   <div>
@@ -243,18 +399,47 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="h-2 bg-gradient-to-r w-[50%] from-blue-500 to-cyan-500 rounded-full" />
+                  <motion.div
+                    className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "50%" }}
+                    transition={{ duration: 2, delay: 1 }}
+                  />
                   <div className="h-2 bg-gray-700 w-[85%] rounded-full" />
                 </div>
                 <div className="text-xs text-gray-400">
                   {new Date(Date.now()).toLocaleTimeString()}
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="sm:absolute w-80 h-48   top-[50%] right-0  backdrop-blur-sm rounded-xl border border-blue-500/30 shadow-2xl font-mono text-xs overflow-hidden">
+            <motion.div
+              className="sm:absolute w-80 h-48 top-[50%] right-0 backdrop-blur-sm rounded-xl border border-blue-500/30 shadow-2xl font-mono text-xs overflow-hidden cursor-pointer"
+              variants={slideInRight}
+              whileHover={{
+                scale: 1.05,
+                rotateY: -5,
+                transition: { duration: 0.3 },
+              }}
+              animate={{
+                y: [0, 10, 0],
+                transition: {
+                  duration: 5,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                  delay: 1,
+                },
+              }}
+            >
               <div className="p-4 space-y-1">
-                <div className="text-blue-400">POST /api/emails</div>
+                <motion.div
+                  className="text-blue-400"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.5 }}
+                >
+                  POST /api/emails
+                </motion.div>
                 <div className="text-gray-500">{"{"}</div>
                 <div className="text-gray-300 ml-2">
                   {'"from"'}: {'"app@user-domain.com"'},
@@ -266,79 +451,72 @@ export default function LandingPage() {
                   {'"subject"'}: {'"Welcome!"'},
                 </div>
                 <div className="text-gray-300 ml-2">
-                  {'"html"'}: {'"<h1>Hellow there!</h1>"'}
+                  {'"html"'}: {'"<h1>Hello there!</h1>"'}
                 </div>
                 <div className="text-gray-500">{"}"}</div>
-                <div className="mt-4 text-green-400">
+                <motion.div
+                  className="mt-4 text-green-400"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 2 }}
+                >
                   ✓ Email sent successfully
-                </div>
+                </motion.div>
               </div>
-            </div>
-
-            <div
-              className="absolute hidden  w-64 h-40 bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl"
-              style={{
-                bottom: "10%",
-                left: "20%",
-              }}
-            >
-              <div className="p-4">
-                <div className="text-sm font-medium text-white mb-3">
-                  Live Analytics
-                </div>
-                <div className="flex items-end gap-1 h-20">
-                  {[65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88, 92].map(
-                    (height, i) => (
-                      <div
-                        key={i}
-                        className="bg-gradient-to-t from-blue-600 to-cyan-400 rounded-sm flex-1 transition-all duration-1000"
-                        style={{
-                          height: `${height}%`,
-                          animationDelay: `${i * 100}ms`,
-                        }}
-                      />
-                    )
-                  )}
-                </div>
-                <div className="text-xs text-gray-400 mt-2">
-                  29,486 emails delivered
-                </div>
-              </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      <section className="relative py-32">
+      <motion.section
+        className="relative py-32"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={staggerContainer}
+      >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <div className="relative inline-block mb-12">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl blur-xl opacity-50" />
-            </div>
-            <h2 className="text-3xl md:text-7xl font-black mb-8">
+          <motion.div className="text-center mb-20" variants={staggerItem}>
+            <motion.h2
+              className="text-3xl md:text-7xl font-black mb-8"
+              variants={fadeInUp}
+            >
               <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 Integrate{" "}
               </span>
               <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
                 in 5 minutes
               </span>
-            </h2>
-            <p className="sm:text-xl text-sm md:text-2xl text-gray-400 max-w-4xl mx-auto leading-relaxed font-light">
+            </motion.h2>
+            <motion.p
+              className="sm:text-xl text-sm md:text-2xl text-gray-400 max-w-4xl mx-auto leading-relaxed font-light"
+              variants={fadeInUp}
+              transition={{ delay: 0.2 }}
+            >
               Simple REST API for sending transactional emails and broadcast
               campaigns. Get your API key and start sending emails.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            {languages.map((lang) => (
-              <button
+          <motion.div
+            className="flex flex-wrap justify-center gap-4 mb-12"
+            variants={fadeIn}
+          >
+            {languages.map((lang, index) => (
+              <motion.button
                 key={lang.id}
                 onClick={() => setSelectedLanguage(lang.id)}
-                className={`relative group flex items-center space-x-3 text-sm px-4 py-2 rounded-2xl border transition-all duration-500 hover:scale-105 ${
+                className={`relative group flex items-center space-x-3 text-sm px-4 py-2 rounded-2xl border transition-all duration-500 ${
                   selectedLanguage === lang.id
                     ? "bg-gradient-to-r from-gray-800/80 to-gray-700/80 border-gray-600/80 text-white shadow-2xl shadow-gray-900/50 backdrop-blur-xl"
                     : "bg-gradient-to-r from-gray-900/40 to-gray-800/40 border-gray-700/40 text-gray-400 hover:text-white hover:border-gray-600/60 backdrop-blur-xl"
                 }`}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                custom={index}
               >
                 <div
                   className={`w-8 h-8 rounded-lg bg-gradient-to-br ${lang.color} flex items-center justify-center text-white font-bold shadow-lg`}
@@ -346,35 +524,54 @@ export default function LandingPage() {
                   {lang.icon}
                 </div>
                 <span className="font-semibold">{lang.name}</span>
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
 
-          <div className="max-w-5xl mx-auto">
+          <motion.div
+            className="max-w-5xl mx-auto"
+            variants={fadeInUp}
+            transition={{ delay: 0.4 }}
+          >
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500" />
-              <Card className="relative bg-black  shadow backdrop-blur-xl overflow-hidden">
+              <Card className="relative bg-black shadow backdrop-blur-xl overflow-hidden">
                 <div className="flex items-center justify-between px-8 py-2 border-b border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-900/50">
                   <div className="flex items-center space-x-4">
                     <Badge className="bg-gradient-to-r from-gray-700 to-gray-800 text-gray-200 border-gray-600/50 shadow-lg">
                       {languages.find((l) => l.id === selectedLanguage)?.name}
                     </Badge>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={copyToClipboard}
-                    className="text-gray-400 hover:text-white hover:bg-gray-700/50  "
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
-                    {copied ? (
-                      <Check className="w-4 h-4 text-green-400" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={copyToClipboard}
+                      className="text-gray-400 hover:text-white hover:bg-gray-700/50"
+                    >
+                      <motion.div
+                        animate={copied ? { rotate: 360 } : { rotate: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {copied ? (
+                          <Check className="w-4 h-4 text-green-400" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </motion.div>
+                    </Button>
+                  </motion.div>
                 </div>
                 <CardContent className="p-0">
-                  <div>
+                  <motion.div
+                    key={selectedLanguage}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <CodeBlock
                       language={selectedLanguage}
                       code={
@@ -383,48 +580,66 @@ export default function LandingPage() {
                         ]
                       }
                     />
-                  </div>
+                  </motion.div>
                 </CardContent>
               </Card>
             </div>
-          </div>
-
-          <div className="mb-20 sm:block hidden mt-60 max-w-6xl mx-auto">
-            <div className="relative group">
-              <div className="relative h-96 rounded-3xl backdrop-blur-xl flex items-center justify-center">
-                <img className=" " alt="" src="../../../../home/api.png" />
-              </div>
-            </div>
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
-      <section id="features" className="relative py-32">
+      <motion.section
+        id="features"
+        className="relative py-32"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={staggerContainer}
+      >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-24">
-            <h2 className="text-3xl md:text-7xl font-black mb-8">
+          <motion.div className="text-center mb-24" variants={staggerItem}>
+            <motion.h2
+              className="text-3xl md:text-7xl font-black mb-8"
+              variants={fadeInUp}
+            >
               <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 Core{" "}
               </span>
               <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
                 Features
               </span>
-            </h2>
-            <p className="text-sm md:text-2xl text-gray-400 max-w-4xl mx-auto leading-relaxed font-light">
+            </motion.h2>
+            <motion.p
+              className="text-sm md:text-2xl text-gray-400 max-w-4xl mx-auto leading-relaxed font-light"
+              variants={fadeInUp}
+              transition={{ delay: 0.2 }}
+            >
               Everything you need to send emails. From transactional emails to
               broadcast campaigns, with custom domains and flexible billing.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-12 mb-20">
-            <div className="relative group">
-              <Card className="relative   shadow-2xl backdrop-blur-xl overflow-hidden  ">
+          <motion.div
+            className="grid lg:grid-cols-2 gap-12 mb-20"
+            variants={staggerContainer}
+          >
+            <motion.div
+              className="relative group"
+              variants={slideInLeft}
+              whileHover={{ y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="relative shadow-2xl backdrop-blur-xl overflow-hidden">
                 <CardContent className="p-10">
                   <div className="flex items-center space-x-4 mb-8">
                     <div className="relative">
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 custom-gradient5 rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <motion.div
+                        className="w-12 h-12 sm:w-16 sm:h-16 custom-gradient5 rounded-2xl flex items-center justify-center flex-shrink-0"
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.5 }}
+                      >
                         <Send className="w-6 h-6 sm:w-8 sm:h-8" />
-                      </div>
+                      </motion.div>
                     </div>
                     <h3 className="text-lg sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                       Email Sending
@@ -435,114 +650,131 @@ export default function LandingPage() {
                     confirmations, and user notifications using a
                     straightforward API.
                   </p>
-                  <div className="space-y-4 text-sm sm:text-base">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full" />
-                      <span className="text-gray-300">
-                        Transactional Email API
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full" />
-                      <span className="text-gray-300">
-                        Broadcast Campaigns (UI & API)
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-pink-400 rounded-full" />
-                      <span className="text-gray-300">
-                        Batch Processing (up to 100 emails)
-                      </span>
-                    </div>
-                  </div>
+                  <motion.div
+                    className="space-y-4 text-sm sm:text-base"
+                    variants={staggerContainer}
+                  >
+                    {[
+                      "Transactional Email API",
+                      "Broadcast Campaigns (UI & API)",
+                      "Batch Processing (up to 100 emails)",
+                    ].map((feature, index) => (
+                      <motion.div
+                        key={index}
+                        className="flex items-center space-x-3"
+                        variants={staggerItem}
+                        custom={index}
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            index === 0
+                              ? "bg-blue-400"
+                              : index === 1
+                              ? "bg-purple-400"
+                              : "bg-pink-400"
+                          }`}
+                        />
+                        <span className="text-gray-300">{feature}</span>
+                      </motion.div>
+                    ))}
+                  </motion.div>
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
 
-            <div className="relative group">
-              <Card className="relative  shadow-2xl backdrop-blur-xl overflow-hidden ">
+            <motion.div
+              className="relative group"
+              variants={slideInRight}
+              whileHover={{ y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="relative shadow-2xl backdrop-blur-xl overflow-hidden">
                 <CardContent className="p-10">
                   <div className="flex items-center space-x-4 mb-8">
                     <div className="relative">
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 custom-gradient5 rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <motion.div
+                        className="w-12 h-12 sm:w-16 sm:h-16 custom-gradient5 rounded-2xl flex items-center justify-center flex-shrink-0"
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.5 }}
+                      >
                         <Globe className="w-6 h-6 sm:w-8 sm:h-8" />
-                      </div>
+                      </motion.div>
                     </div>
                     <h3 className="text-lg sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                       Custom Domains
                     </h3>
                   </div>
-                  <p className="text-gray-400 mb-8 leading-relaxed sm:text-lg text-sm ">
+                  <p className="text-gray-400 mb-8 leading-relaxed sm:text-lg text-sm">
                     Use your own domain to send emails, with support for DKIM
                     and domain verification to maintain brand identity and
                     improve deliverability.
                   </p>
-                  <div className="space-y-4 text-sm sm:text-base">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-green-400 rounded-full" />
-                      <span className="text-gray-300">Domain Verification</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full" />
-                      <span className="text-gray-300">DKIM Configuration</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full" />
-                      <span className="text-gray-300">Brand Email Sending</span>
-                    </div>
-                  </div>
+                  <motion.div
+                    className="space-y-4 text-sm sm:text-base"
+                    variants={staggerContainer}
+                  >
+                    {[
+                      "Domain Verification",
+                      "DKIM Configuration",
+                      "Brand Email Sending",
+                    ].map((feature, index) => (
+                      <motion.div
+                        key={index}
+                        className="flex items-center space-x-3"
+                        variants={staggerItem}
+                        custom={index}
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            index === 0
+                              ? "bg-green-400"
+                              : index === 1
+                              ? "bg-blue-400"
+                              : "bg-purple-400"
+                          }`}
+                        />
+                        <span className="text-gray-300">{feature}</span>
+                      </motion.div>
+                    ))}
+                  </motion.div>
                 </CardContent>
               </Card>
-            </div>
-          </div>
-
-          <div className="mb-20 sm:block hidden max-w-6xl mx-auto">
-            <div className="relative group">
-              <div className="relative h-96 rounded-3xl backdrop-blur-xl flex items-center justify-center">
-                <div className="text-center">
-                  <img alt="" src="../../../../home/emails.png" />
-                </div>
-              </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="relative hidden py-20">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-orange-600/30 via-red-600/30 to-pink-600/30 rounded-3xl blur-xl opacity-50" />
-            <div className="relative h-80 bg-gradient-to-br from-gray-900/80 to-gray-800/80 rounded-3xl border border-gray-700/50 backdrop-blur-xl flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-gray-700 to-gray-800 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                  <Mail className="w-10 h-10 text-gray-400" />
-                </div>
-                <p className="text-gray-500 font-medium text-lg">
-                  Email logs and analytics
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
+      <motion.section
         id="pricing"
         className="relative z-10 max-w-7xl mx-auto px-6 py-32"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={staggerContainer}
       >
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-6xl font-black mb-4">
+        <motion.div className="text-center mb-16" variants={staggerItem}>
+          <motion.h2
+            className="text-3xl sm:text-6xl font-black mb-4"
+            variants={fadeInUp}
+          >
             <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
               Simple
             </span>{" "}
             pricing
-          </h2>
-          <p className="sm:text-xl text-sm text-gray-300">
+          </motion.h2>
+          <motion.p
+            className="sm:text-xl text-sm text-gray-300"
+            variants={fadeInUp}
+            transition={{ delay: 0.2 }}
+          >
             Start free, scale as you grow
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl text-sm sm:text-base mx-auto">
+        <motion.div
+          className="grid md:grid-cols-3 gap-8 max-w-5xl text-sm sm:text-base mx-auto"
+          variants={staggerContainer}
+        >
           {[
             {
               name: "Free",
@@ -578,202 +810,301 @@ export default function LandingPage() {
               popular: false,
             },
           ].map((plan, i) => (
-            <div
+            <motion.div
               key={i}
-              className={`relative p-8 rounded-2xl border transition-all duration-500 hover:scale-105 ${
+              className={`relative p-8 rounded-2xl border transition-all duration-500 ${
                 plan.popular
                   ? "bg-gradient-to-br from-blue-900/50 to-cyan-900/50 border-blue-500/50"
                   : "bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-gray-800"
               }`}
+              custom={i}
             >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-full text-sm font-medium">
-                    Most Popular
-                  </div>
-                </div>
-              )}
               <div className="text-center">
                 <h3 className="sm:text-2xl text-lg font-bold mb-2">
                   {plan.name}
                 </h3>
-                <div className="sm:text-5xl text-2xl font-black mb-6">
+                <motion.div
+                  className="sm:text-5xl text-2xl font-black mb-6"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.3 + i * 0.1, type: "spring" }}
+                >
                   {plan.price}
-                </div>
-                <ul className="space-y-4 mb-8">
+                </motion.div>
+                <motion.ul
+                  className="space-y-4 mb-8"
+                  variants={staggerContainer}
+                >
                   {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-center gap-3">
+                    <motion.li
+                      key={j}
+                      className="flex items-center gap-3"
+                      variants={staggerItem}
+                      custom={j}
+                    >
                       <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full" />
                       <span className="text-gray-300">{feature}</span>
-                    </li>
+                    </motion.li>
                   ))}
-                </ul>
+                </motion.ul>
                 <Link href={"/register"}>
-                  <Button
-                    size="lg"
-                    className={`w-full ${
-                      plan.popular
-                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
-                        : "bg-transparent border border-gray-700 hover:bg-white/10"
-                    }`}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    {plan.popular ? "Upgrade to Pro" : "Get Started"}
-                  </Button>
+                    <Button
+                      size="lg"
+                      className={`w-full ${
+                        plan.popular
+                          ? "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+                          : "bg-transparent border border-gray-700 hover:bg-white/10"
+                      }`}
+                    >
+                      {plan.popular ? "Upgrade to Pro" : "Get Started"}
+                    </Button>
+                  </motion.div>
                 </Link>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
-        <p className="text-center my-7">
+        </motion.div>
+
+        <motion.p
+          className="text-center my-7"
+          variants={fadeInUp}
+          transition={{ delay: 0.8 }}
+        >
           To customize your plan, please
           <a
             target="_blank"
             href="https://contact.soorajrao.in/?querytype=contact&message=I want to customize plan for mailory&utm_medium=mailory_pricing&utm_source=mailory"
             className="text-primary hover:underline ml-1"
+            rel="noreferrer"
           >
             reach out to us
           </a>
-        </p>
-      </section>
+        </motion.p>
+      </motion.section>
 
-      <section className="relative py-32 overflow-hidden">
+      <motion.section
+        className="relative py-32 overflow-hidden"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={staggerContainer}
+      >
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent" />
         <div className="relative max-w-5xl mx-auto px-6 lg:px-8 text-center">
-          <div className="mb-12">
-            <h2 className="text-3xl md:text-7xl font-black mb-8">
+          <motion.div className="mb-12" variants={staggerItem}>
+            <motion.h2
+              className="text-3xl md:text-7xl font-black mb-8"
+              variants={fadeInUp}
+            >
               <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
                 Ready to start sending?
               </span>
-            </h2>
-            <p className=" text-sm sm:text-xl md:text-2xl text-gray-400 mb-16 max-w-3xl mx-auto leading-relaxed font-light">
+            </motion.h2>
+            <motion.p
+              className="text-sm sm:text-xl md:text-2xl text-gray-400 mb-16 max-w-3xl mx-auto leading-relaxed font-light"
+              variants={fadeInUp}
+              transition={{ delay: 0.2 }}
+            >
               Get your API key and start sending emails in minutes. Free tier
               available with generous limits to get you started.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            </motion.p>
+          </motion.div>
+          <motion.div
+            className="flex flex-col sm:flex-row gap-6 justify-center"
+            variants={staggerItem}
+            transition={{ delay: 0.4 }}
+          >
             <Link href="/register">
-              <Button
-                size="lg"
-                className="relative group  scale-75 sm:scale-100   px-12 py-5 text-xl font-bold  hover:shadow hover:shadow-primary transition-all duration-500 "
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="relative z-10 flex items-center">
-                  Start for Free
-                  <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform" />
-                </span>
-              </Button>
+                <Button
+                  size="lg"
+                  className="relative group scale-75 sm:scale-100 px-12 py-5 text-xl font-bold hover:shadow hover:shadow-primary transition-all duration-500"
+                >
+                  <span className="relative z-10 flex items-center">
+                    Start for Free
+                    <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform" />
+                  </span>
+                </Button>
+              </motion.div>
             </Link>
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
-      <footer className="relative border-t pt-16 pb-4 border-white/5 bg-black">
-        <h1 className="md:text-[12rem] hidden md:block  text-center  lg:text-[16rem] font-extrabold text-white/5 select-none">
-          MAILORY
-        </h1>
+      <motion.footer
+        className="relative border-t pt-20 pb-4 border-white/5 bg-black"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={staggerContainer}
+      >
+        <motion.div
+          className="relative md:text-[12rem] hidden md:block text-center lg:text-[16rem] font-extrabold select-none overflow-hidden"
+          variants={fadeIn}
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+          onMouseMove={updateMousePosition}
+          style={{ cursor: isHovering ? "none" : "default" }}
+        >
+          <h1 className="text-white/5">MAILORY</h1>
 
-        <div className="  max-w-7xl    mx-auto p-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-12  mb-12">
-            <div className="">
+          <motion.h1
+            className="absolute inset-0 text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text font-extrabold"
+            style={{
+              maskImage: isHovering
+                ? `radial-gradient(circle 150px at ${mousePosition.x}px ${mousePosition.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%, rgba(0,0,0,0) 100%)`
+                : "none",
+              WebkitMaskImage: isHovering
+                ? `radial-gradient(circle 150px at ${mousePosition.x}px ${mousePosition.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%, rgba(0,0,0,0) 100%)`
+                : "none",
+            }}
+            animate={{
+              opacity: isHovering ? 1 : 0,
+            }}
+            transition={{ duration: 0.2 }}
+          >
+            MAILORY
+          </motion.h1>
+
+          {isHovering && (
+            <motion.div
+              className="absolute pointer-events-none"
+              style={{
+                left: mousePosition.x - 75,
+                top: mousePosition.y - 75,
+                width: 150,
+                height: 150,
+                background:
+                  "radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(34, 197, 94, 0.2) 30%, rgba(168, 85, 247, 0.1) 60%, transparent 100%)",
+                borderRadius: "50%",
+                filter: "blur(20px)",
+              }}
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.6, 0.8, 0.6],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+            />
+          )}
+
+          {isHovering && (
+            <motion.div
+              className="fixed pointer-events-none z-50"
+              style={{
+                left: mousePosition.x - 10,
+                top: mousePosition.y - 10,
+                width: 20,
+                height: 20,
+                background:
+                  "radial-gradient(circle, rgba(59, 130, 246, 0.8) 0%, rgba(34, 197, 94, 0.6) 50%, transparent 100%)",
+                borderRadius: "50%",
+                filter: "blur(2px)",
+              }}
+              animate={{
+                scale: [1, 1.5, 1],
+              }}
+              transition={{
+                duration: 1,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+            />
+          )}
+        </motion.div>
+        <div className="max-w-7xl mx-auto p-6">
+          <motion.div
+            className="flex flex-col sm:flex-row items-center justify-between gap-12 mb-12"
+            variants={staggerContainer}
+          >
+            <motion.div variants={staggerItem}>
               <Logo />
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center gap-20">
-              <div>
-                <h3 className="text-white font-semibold mb-4">Application</h3>
-                <ul className="space-y-3 text-gray-400 text-sm">
-                  <li>
-                    <Link
-                      href="/#features"
-                      className="hover:text-white transition-colors"
-                    >
-                      Features
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/login"
-                      className="hover:text-white transition-colors"
-                    >
-                      Demo
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-white font-semibold mb-4">Resources</h3>
-                <ul className="space-y-3 text-gray-400 text-sm">
-                  <li>
-                    <Link
-                      href="#pricing"
-                      className="hover:text-white transition-colors"
-                    >
-                      Pricing
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/docs"
-                      className="hover:text-white transition-colors"
-                    >
-                      Docs
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-white font-semibold mb-4">Help</h3>
-                <ul className="space-y-3 text-gray-400 text-sm">
-                  <li>
-                    <Link
-                      href="https://contact.soorajrao.in/?querytype=contact&message=I wanna talk&utm_medium=mailory_sidebar&utm_source=mailory"
-                      className="hover:text-white transition-colors"
-                    >
-                      Contact
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="https://contact.soorajrao.in/?querytype=report a issue&message=i want to reporta issue in mailory.site&utm_medium=mailory_footer&utm_source=mailory"
-                      className="hover:text-white transition-colors"
-                    >
-                      Report bug
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="py-4 ">
-            <div className="flex  justify-center space-y-4 md:space-y-0">
+            </motion.div>
+            <motion.div
+              className="flex flex-col sm:flex-row items-center gap-20"
+              variants={staggerContainer}
+            >
+              {[
+                {
+                  title: "Application",
+                  links: [
+                    { name: "Features", href: "/#features" },
+                    { name: "Demo", href: "/login" },
+                  ],
+                },
+                {
+                  title: "Resources",
+                  links: [
+                    { name: "Pricing", href: "#pricing" },
+                    { name: "Docs", href: "/docs" },
+                  ],
+                },
+                {
+                  title: "Help",
+                  links: [
+                    {
+                      name: "Contact",
+                      href: "https://contact.soorajrao.in/?querytype=contact&message=I wanna talk&utm_medium=mailory_sidebar&utm_source=mailory",
+                    },
+                    {
+                      name: "Report bug",
+                      href: "https://contact.soorajrao.in/?querytype=report a issue&message=i want to reporta issue in mailory.site&utm_medium=mailory_footer&utm_source=mailory",
+                    },
+                  ],
+                },
+              ].map((section, index) => (
+                <motion.div key={index} variants={staggerItem} custom={index}>
+                  <h3 className="text-white font-semibold mb-4">
+                    {section.title}
+                  </h3>
+                  <ul className="space-y-3 text-gray-400 text-sm">
+                    {section.links.map((link, linkIndex) => (
+                      <motion.li
+                        key={linkIndex}
+                        whileHover={{ x: 5 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Link
+                          href={link.href}
+                          className="hover:text-white transition-colors"
+                        >
+                          {link.name}
+                        </Link>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
+          <motion.div className="py-4" variants={staggerItem}>
+            <div className="flex justify-center space-y-4 md:space-y-0">
               <p className="text-gray-500 text-sm">
                 Developed by{" "}
-                <a target="_blank" href="https://soorajrao.in/?ref=mailory">
+                <a
+                  target="_blank"
+                  href="https://soorajrao.in/?ref=mailory"
+                  rel="noreferrer"
+                >
                   <span className="text-white font-medium hover:underline">
                     Sooraj Rao
                   </span>
                 </a>
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </footer>
-
-      <style jsx>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-20px) rotate(3deg);
-          }
-        }
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-      `}</style>
+      </motion.footer>
     </div>
   );
 }
