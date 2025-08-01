@@ -27,6 +27,7 @@ import {
   Plus,
   ExternalLink,
   AlertTriangle,
+  ShieldQuestionIcon,
 } from "lucide-react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { copyToClipboard } from "@/app/helper/copy";
@@ -78,7 +79,7 @@ export default function ApiKeysPage() {
 
   const refreshData = async () => {
     setRefreshing(true);
-    await mutate(); 
+    await mutate();
     setRefreshing(false);
     setSuccess("Data refreshed!");
     setTimeout(() => setSuccess(""), 2000);
@@ -108,7 +109,7 @@ export default function ApiKeysPage() {
         if (data?.apiKey?.keyValue) {
           copyToClipboard(data?.apiKey?.keyValue, "", false);
         }
-        await mutate(); 
+        await mutate();
       } else {
         throw new Error(data.error || "Failed to create API key");
       }
@@ -255,7 +256,15 @@ export default function ApiKeysPage() {
                     )}
                   </DialogContent>
                 </Dialog>
-
+                <Link target="_blank" href={"/docs/?to=send-email"}>
+                  <Button
+                    variant="outline"
+                    className="custom-gradient bg-transparent"
+                  >
+                    <ShieldQuestionIcon />
+                    How to Use
+                  </Button>
+                </Link>
                 <Button
                   onClick={refreshData}
                   disabled={refreshing}

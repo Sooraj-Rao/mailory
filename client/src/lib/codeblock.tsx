@@ -46,7 +46,7 @@ export default function CodeBlock({
 
       <SyntaxHighlighter
         language={language}
-        style={theme === "dark" ? vscDarkPlus : lightfair}
+        style={theme === "light" ? lightfair : vscDarkPlus}
         customStyle={{
           padding: "1rem",
           borderRadius: "0.375rem",

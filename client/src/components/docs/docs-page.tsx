@@ -533,7 +533,7 @@ echo $response;
 }`}
                       language="json"
                     />
-                    <ErrorRedirectDialog />
+                    <ErrorRedirectDialog setActiveSection={setActiveSection} />
                   </CardContent>
                 </Card>
               </div>
@@ -606,6 +606,27 @@ echo $response;
                         <div className="text-sm">Email subject line</div>
                       </div>
 
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg border text-sm">
+                        <div className="flex items-center space-x-2">
+                          <code className="font-medium">from</code>
+                          <Badge variant="destructive" className="text-xs">
+                            required
+                          </Badge>
+                        </div>
+                        <div className="text-muted-foreground">string</div>
+                        <div>Sender name or Your App name</div>
+
+                        <div className="sm:col-span-3 text-muted-foreground mt-2">
+                          <code className="font-medium text-foreground">
+                            Format:
+                          </code>
+                          <code className="bg-muted px-2 py-1 rounded">
+                            <span className=" font-semibold mr-1">NAME</span>
+                            &lt;email@mailory.site&gt;
+                          </code>
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg border">
                         <div>
                           <code className="text-sm font-medium">html</code>
@@ -632,19 +653,6 @@ echo $response;
                         <div className="text-sm">
                           Plain text content of the email
                         </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg border">
-                        <div>
-                          <code className="text-sm font-medium">from</code>
-                          <Badge variant="secondary" className="ml-2 text-xs">
-                            optional
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          string
-                        </div>
-                        <div className="text-sm">Sender name</div>
                       </div>
 
                       <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
@@ -841,7 +849,7 @@ echo $response;
 }`}
                       language="json"
                     />
-                    <ErrorRedirectDialog />
+                    <ErrorRedirectDialog setActiveSection={setActiveSection} />
                   </CardContent>
                 </Card>
               </div>
@@ -1321,7 +1329,11 @@ const GenerateAPIKeyDialog = () => (
   </div>
 );
 
-const ErrorRedirectDialog = () => (
+const ErrorRedirectDialog = ({
+  setActiveSection,
+}: {
+  setActiveSection: (v: string) => void;
+}) => (
   <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
     <div className="flex items-start gap-3">
       <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5" />
@@ -1330,6 +1342,7 @@ const ErrorRedirectDialog = () => (
           More details on all types of errors and how to handle them can be
           found
           <Link
+            onClick={() => setActiveSection("error-handling")}
             className=" ml-1 text-foreground underline"
             href={"/docs/?to=error-handling"}
           >
