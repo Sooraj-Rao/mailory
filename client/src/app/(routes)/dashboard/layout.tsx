@@ -23,14 +23,6 @@ export default function DashboardLayout({
     }
   }, [userData, userDataLoading, router]);
 
-  // if (!userData && userDataLoading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="text-foreground">Loading...</div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="min-h-screen bg-background">
       <CustomSidebar

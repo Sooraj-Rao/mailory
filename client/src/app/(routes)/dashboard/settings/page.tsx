@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,10 +50,23 @@ interface UserSettings {
   };
 }
 
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to fetch settings");
+  }
+  return data.settings;
+};
+
 export default function SettingsPage() {
   const { setUserData } = useZustandStore();
-  const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: settings,
+    error,
+    mutate,
+    isLoading,
+  } = useSWR<UserSettings | null, Error>("/api/settings", fetcher);
   const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwords, setPasswords] = useState({
@@ -71,28 +85,18 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
-    try {
-      const response = await fetch("/api/settings");
-      const data = await response.json();
-      if (response.ok) {
-        setSettings(data.settings);
-        setProfileData({
-          name: data.settings.profile.name,
-          email: data.settings.profile.email,
-        });
-        setPreferences(data.settings.preferences);
-      }
-    } catch (error) {
-      console.error("Failed to fetch settings:", error);
-      toast("Failed to load settings");
-    } finally {
-      setLoading(false);
+    if (settings) {
+      setProfileData({
+        name: settings.profile.name,
+        email: settings.profile.email,
+      });
+      setPreferences(settings.preferences);
     }
-  };
+  }, [settings]);
+
+  useEffect(() => {
+    if (error) toast(error.message);
+  }, [error]);
 
   const updateProfile = async () => {
     setSaving(true);
@@ -106,7 +110,7 @@ export default function SettingsPage() {
       if (response.ok) {
         toast("Profile updated successfully!");
         setUserData(data.user);
-        fetchSettings();
+        await mutate(); 
       } else {
         toast(data.error || "Failed to update profile");
       }
@@ -145,6 +149,7 @@ export default function SettingsPage() {
           newPassword: "",
           confirmPassword: "",
         });
+        await mutate();
       } else {
         toast(data.error || "Failed to update password");
       }
@@ -166,7 +171,7 @@ export default function SettingsPage() {
       const data = await response.json();
       if (response.ok) {
         toast("Preferences updated successfully!");
-        fetchSettings();
+        await mutate();
       } else {
         toast(data.error || "Failed to update preferences");
       }
@@ -207,13 +212,13 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen gap-x-2 app-gradient flex items-center justify-center p-4">
         <p>
-          <Loader2 className=" animate-spin" />
+          <Loader2 className="animate-spin" />
         </p>
-        <div className="text-foreground">Loading settings..</div>
+        <div className="text-foreground">Loading settings...</div>
       </div>
     );
   }
@@ -228,7 +233,7 @@ export default function SettingsPage() {
           <p className="text-sm sm:text-base text-muted-foreground mb-4">
             Unable to load your settings. Please try again.
           </p>
-          <Button onClick={fetchSettings} className="w-full sm:w-auto">
+          <Button onClick={() => mutate()} className="w-full sm:w-auto">
             Retry
           </Button>
         </div>

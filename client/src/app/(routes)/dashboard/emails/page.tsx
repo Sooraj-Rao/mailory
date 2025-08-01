@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -13,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import {
   RefreshCw,
   AlertTriangle,
@@ -26,6 +26,7 @@ import {
   Clock,
   Copy,
   Check,
+  Plus,
 } from "lucide-react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { copyToClipboard } from "@/app/helper/copy";
@@ -64,10 +65,23 @@ interface EmailStats {
   }>;
 }
 
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to fetch email stats");
+  }
+  return data;
+};
+
 export default function EmailsPage() {
   const { userData } = useZustandStore();
-  const [emailStats, setEmailStats] = useState<EmailStats | null>(null);
-  const [error, setError] = useState("");
+  const {
+    data: emailStats,
+    error,
+    mutate,
+    isLoading,
+  } = useSWR<EmailStats, Error>("/api/email-stats", fetcher);
   const [success, setSuccess] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,40 +89,17 @@ export default function EmailsPage() {
   const [timeFilter, setTimeFilter] = useState("15");
   const [apiNameFilter, setapiNameFilter] = useState("all");
   const [copyEmailId, setcopyEmailId] = useState("");
-  const [isLoading, setisLoading] = useState(true);
-
-  useEffect(() => {
-    fetchEmailStats();
-  }, []);
-
-  const fetchEmailStats = async () => {
-    try {
-      setisLoading(true);
-      const response = await fetch("/api/email-stats");
-      const data = await response.json();
-      if (response.ok) {
-        setEmailStats(data);
-      } else {
-        setError(data.error || "Failed to fetch email stats");
-      }
-    } catch {
-      setError("Failed to fetch email stats");
-      console.error("Failed to fetch email stats");
-    } finally {
-      setisLoading(false);
-    }
-  };
 
   const refreshData = async () => {
     setRefreshing(true);
-    await fetchEmailStats();
+    await mutate(); 
     setRefreshing(false);
     setSuccess("Data refreshed!");
     setTimeout(() => setSuccess(""), 2000);
   };
 
   useEffect(() => {
-    if (success || error) toast(success || error);
+    if (success || error) toast(success || error?.message);
   }, [success, error]);
 
   const getStatusIcon = (status: string) => {
@@ -116,7 +107,7 @@ export default function EmailsPage() {
       case "sent":
         return (
           <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-green-200 hover:bg-green-300 dark:bg-green-900/40 dark:hover:bg-green-900/60 dark:text-green-500 text-green-900 flex items-center justify-center">
-            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />{" "}
+            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
           </div>
         );
 
@@ -129,7 +120,7 @@ export default function EmailsPage() {
 
       case "failed":
         return (
-          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-red-200 hover:bg-red-300 dark:bg-red-900/40 dark:hover:bg-red-900/60 dark:text-red-500 text-red-900  flex items-center justify-center">
+          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-red-200 hover:bg-red-300 dark:bg-red-900/40 dark:hover:bg-red-900/60 dark:text-red-500 text-red-900 flex items-center justify-center">
             <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
           </div>
         );
@@ -149,6 +140,7 @@ export default function EmailsPage() {
         );
     }
   };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "sent":
@@ -197,6 +189,7 @@ export default function EmailsPage() {
   emailStats?.recentEmails?.map((item) => {
     if (!DropDownApi.includes(item.api)) DropDownApi.push(item.api);
   });
+
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-10 flex justify-center">
       <div className="w-full max-w-7xl">
@@ -273,7 +266,7 @@ export default function EmailsPage() {
                 <SelectTrigger className="w-32 sm:w-40 custom-gradient2">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="custom-gradient_dropdown  ">
+                <SelectContent className="custom-gradient_dropdown">
                   <SelectItem value="15">Last 15 days</SelectItem>
                   <SelectItem value="30">Last 30 days</SelectItem>
                   <SelectItem value="90">Last 90 days</SelectItem>
@@ -331,7 +324,6 @@ export default function EmailsPage() {
                           <p className="text-sm font-medium truncate">
                             {email.subject}
                           </p>
-
                           <div className="text-xs text-muted-foreground mt-1">
                             {formatDistanceToNowStrict(new Date(email.sentAt), {
                               addSuffix: true,
@@ -353,7 +345,7 @@ export default function EmailsPage() {
                             setcopyEmailId("");
                           }, 1000);
                         }}
-                        className="font-medium flex items-center gap-2 group  hover:decoration-primary decoration-dotted underline-offset-2 text-sm truncate"
+                        className="font-medium flex items-center gap-2 group hover:decoration-primary decoration-dotted underline-offset-2 text-sm truncate"
                       >
                         <span className="truncate text-muted-foreground">
                           {email.to}
@@ -375,12 +367,12 @@ export default function EmailsPage() {
                 ))
               ) : isLoading ? (
                 <div>
-                  <div className=" h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
-                  <div className=" h-24  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-24 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
-                  <div className=" h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-24 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
-                  <div className=" h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -394,6 +386,12 @@ export default function EmailsPage() {
                       ? "Try adjusting your search or filter criteria"
                       : "Start sending emails to see your activity here"}
                   </p>
+                  <Link href={"/dashboard/api-keys"}>
+                    <Button className="mt-3">
+                      <Plus />
+                      Create API key
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>
@@ -416,7 +414,7 @@ export default function EmailsPage() {
                             setcopyEmailId("");
                           }, 1000);
                         }}
-                        className="font-medium flex items-center gap-2 group  hover:decoration-primary decoration-dotted underline-offset-2 truncate"
+                        className="font-medium flex items-center gap-2 group hover:decoration-primary decoration-dotted underline-offset-2 truncate"
                       >
                         <span className="truncate">{email.to}</span>
                         {copyEmailId === String(index) ? (
@@ -446,12 +444,12 @@ export default function EmailsPage() {
                 ))
               ) : isLoading ? (
                 <div>
-                  <div className=" h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
-                  <div className=" h-12  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
-                  <div className=" h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
-                  <div className=" h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -465,6 +463,12 @@ export default function EmailsPage() {
                       ? "Try adjusting your search or filter criteria"
                       : "Start sending emails to see your activity here"}
                   </p>
+                  <Link href={"/dashboard/api-keys"}>
+                    <Button className="mt-3">
+                      <Plus />
+                      Create API key
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>

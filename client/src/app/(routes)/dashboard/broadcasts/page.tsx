@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -41,51 +42,39 @@ type T_Broadcasts = {
   createdAt: string;
 };
 
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to fetch broadcast stats");
+  }
+  return data.batches;
+};
+
 export default function BroadcastsPage() {
   const { userData } = useZustandStore();
-  const [broadcastStats, setBroadcastStats] = useState<T_Broadcasts[] | null>(
-    null
-  );
-  const [error, setError] = useState("");
+  const {
+    data: broadcastStats,
+    error,
+    mutate,
+    isLoading,
+  } = useSWR<T_Broadcasts[], Error>("/api/broadcasts/status", fetcher);
   const [success, setSuccess] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("15");
-  const [isLoading, setisLoading] = useState(true);
-
-  useEffect(() => {
-    fetchBroadcastStats();
-  }, []);
-
-  const fetchBroadcastStats = async () => {
-    try {
-      setisLoading(true);
-      const response = await fetch("/api/broadcasts/status");
-      const data = await response.json();
-      if (response.ok) {
-        setBroadcastStats(data.batches);
-      } else {
-        setError(data.error || "Failed to fetch broadcast stats");
-      }
-    } catch {
-      setError("Failed to fetch broadcast stats");
-      console.error("Failed to fetch broadcast stats");
-    } finally {
-      setisLoading(false);
-    }
-  };
 
   const refreshData = async () => {
     setRefreshing(true);
-    await fetchBroadcastStats();
+    await mutate();
     setRefreshing(false);
     setSuccess("Data refreshed!");
     setTimeout(() => setSuccess(""), 2000);
   };
 
   useEffect(() => {
-    if (success || error) toast(success || error);
+    if (success || error) toast(success || error?.message);
   }, [success, error]);
 
   const getStatusIcon = (status: string) => {
@@ -276,11 +265,11 @@ export default function BroadcastsPage() {
                 filteredBroadcasts.map((broadcast: T_Broadcasts) => (
                   <div key={broadcast.batchId} className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3 flex-1s min-w-0">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="min-w-0 flex-1">
                           <Link
                             href={`/dashboard/broadcasts/${broadcast.batchId}`}
-                            className=" underline-offset-2 hover:underline group flex items-center gap-x-2"
+                            className="underline-offset-2 hover:underline group flex items-center gap-x-2"
                           >
                             <p className="font-medium flex items-center gap-2 group truncate text-left text-sm">
                               {broadcast?.subject || "No subject"}
@@ -304,9 +293,9 @@ export default function BroadcastsPage() {
                         {getStatusBadge(broadcast)}
                       </div>
                     </div>
-                    <div className=" space-y-2">
+                    <div className="space-y-2">
                       <div className="flex items-center text-muted-foreground/80 gap-2 text-sm">
-                        <Users className="w-4 h-4 " />
+                        <Users className="w-4 h-4" />
                         <span>{broadcast.totalEmails} recipients</span>
                       </div>
                       <div className="text-sm text-muted-foreground">
@@ -316,13 +305,13 @@ export default function BroadcastsPage() {
                   </div>
                 ))
               ) : isLoading ? (
-               <div>
-                  <div className=" h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
-                  <div className=" h-24  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-24 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
-                  <div className=" h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-24 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
-                  <div className=" h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                <div>
+                  <div className="h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -397,13 +386,13 @@ export default function BroadcastsPage() {
                   </div>
                 ))
               ) : isLoading ? (
-              <div>
-                  <div className=" h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
-                  <div className=" h-12  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
-                  <div className=" h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
-                  <div className=" h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                <div>
+                  <div className="h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">

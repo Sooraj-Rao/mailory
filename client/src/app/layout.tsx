@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Mailory - Reliable Email API Service",
+  title: "Mailory - Simple Email for Developers",
   description:
     "The simple email API for developers, startups, and enterprises. Send transactional emails and campaigns with confidence.",
   keywords: [

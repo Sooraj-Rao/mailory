@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -13,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import {
   RefreshCw,
   AlertTriangle,
@@ -39,48 +39,38 @@ interface Domain {
   updatedAt: string;
 }
 
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to fetch domains");
+  }
+  return data.domains;
+};
+
 export default function DomainPage() {
   const { userData } = useZustandStore();
-  const [domains, setDomains] = useState<Domain[]>([]);
-  const [error, setError] = useState("");
+  const {
+    data: domains,
+    error,
+    mutate,
+    isLoading,
+  } = useSWR<Domain[], Error>("/api/domains", fetcher);
   const [success, setSuccess] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetchDomains();
-  }, []);
-
-  const fetchDomains = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch("/api/domains");
-      const data = await response.json();
-      if (response.ok) {
-        setDomains(data.domains);
-      } else {
-        setError(data.error || "Failed to fetch domains");
-      }
-    } catch {
-      setError("Failed to fetch domains");
-      console.error("Failed to fetch domains");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const refreshData = async () => {
     setRefreshing(true);
-    await fetchDomains();
+    await mutate(); 
     setRefreshing(false);
     setSuccess("Data refreshed!");
     setTimeout(() => setSuccess(""), 2000);
   };
 
   useEffect(() => {
-    if (success || error) toast(success || error);
+    if (success || error) toast(success || error?.message);
   }, [success, error]);
 
   const getStatusIcon = (dkimStatus: string) => {
@@ -115,7 +105,7 @@ export default function DomainPage() {
     }
   };
 
-  const filteredDomains = domains.filter((domain) => {
+  const filteredDomains = (domains || []).filter((domain) => {
     const matchesSearch =
       domain.domain.toLowerCase().includes(searchQuery.toLowerCase()) ||
       domain.mailFromDomain
@@ -178,9 +168,9 @@ export default function DomainPage() {
         </div>
 
         <div className="p-2 sm:p-6">
-          {domains.length > 0 &&
-            domains.some(
-              (d) => !d.verified && d.dkimStatus !== "configured"
+          {(domains || []).length > 0 &&
+            domains?.some(
+              (d) => !d.verified && d.dkimStatus !== "verified"
             ) && (
               <Alert className="mb-4 sm:mb-6 border-yellow-500/50 bg-yellow-500/10 text-yellow-400">
                 <AlertDescription className="flex items-center gap-2 sm:gap-3 text-sm">
@@ -239,11 +229,11 @@ export default function DomainPage() {
                         <div className="min-w-0 flex-1">
                           <Link
                             href={`/dashboard/domains/${domain.id}`}
-                            className="font-medium flex items-center gap-2 group hover:underline   underline-offset-2 truncate"
+                            className="font-medium flex items-center gap-2 group hover:underline underline-offset-2 truncate"
                           >
                             <span className="truncate">{domain.domain}</span>
                             <ExternalLink
-                              className=" group-hover:visible invisible"
+                              className="group-hover:visible invisible"
                               size={14}
                             />
                           </Link>
@@ -263,7 +253,7 @@ export default function DomainPage() {
                     </div>
                     <div className="">
                       <p className="text-sm text-muted-foreground/90 font-medium truncate">
-                        <span className=" font-bold">MAIL FROM: </span>
+                        <span className="font-bold">MAIL FROM: </span>
                         {domain.mailFromDomain || "N/A"}
                       </p>
                     </div>
@@ -271,9 +261,9 @@ export default function DomainPage() {
                 ))
               ) : isLoading ? (
                 <div>
-                  <div className=" h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
-                  <div className=" h-24  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-24 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -302,11 +292,11 @@ export default function DomainPage() {
                       {getStatusIcon(domain.dkimStatus)}
                       <Link
                         href={`/dashboard/domains/${domain.id}`}
-                        className="font-medium flex items-center gap-2 group hover:underline   underline-offset-2 truncate"
+                        className="font-medium flex items-center gap-2 group hover:underline underline-offset-2 truncate"
                       >
                         <span className="truncate">{domain.domain}</span>
                         <ExternalLink
-                          className=" group-hover:visible invisible"
+                          className="group-hover:visible invisible"
                           size={14}
                         />
                       </Link>
@@ -328,9 +318,9 @@ export default function DomainPage() {
                 ))
               ) : isLoading ? (
                 <div>
-                  <div className=" h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
-                  <div className=" h-12  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">

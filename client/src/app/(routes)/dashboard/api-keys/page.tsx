@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-
 import {
   Dialog,
   DialogContent,
@@ -48,45 +49,36 @@ interface ApiKey {
   };
 }
 
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok || !data.success) {
+    throw new Error(data.error || "Failed to fetch API keys");
+  }
+  return data.apiKeys.reverse();
+};
+
 export default function ApiKeysPage() {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-  const [error, setError] = useState("");
+  const {
+    data: apiKeys = [],
+    error,
+    mutate,
+    isLoading,
+  } = useSWR<ApiKey[], Error>("/api/keys", fetcher);
   const [success, setSuccess] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
-  const [isLoading, setisLoading] = useState("");
+  const [isLoadingAction, setIsLoadingAction] = useState("");
   const [apiKeyValue, setApiKeyValue] = useState<{
     keyName: string;
     keyValue: string;
   } | null>(null);
 
-  useEffect(() => {
-    fetchApiKeys();
-  }, []);
-
-  const fetchApiKeys = async () => {
-    try {
-      setisLoading("fetch");
-      const response = await fetch("/api/keys");
-      const data = await response.json();
-      if (response.ok && data.success) {
-        setApiKeys(data.apiKeys.reverse());
-      } else {
-        setError(data.error || "Failed to fetch API keys");
-      }
-    } catch (error) {
-      setError("Failed to fetch API keys");
-      console.error("Failed to fetch API keys:", error);
-    } finally {
-      setisLoading("");
-    }
-  };
-
   const refreshData = async () => {
     setRefreshing(true);
-    await fetchApiKeys();
+    await mutate(); 
     setRefreshing(false);
     setSuccess("Data refreshed!");
     setTimeout(() => setSuccess(""), 2000);
@@ -96,8 +88,7 @@ export default function ApiKeysPage() {
     e.preventDefault();
     if (!newKeyName.trim()) return;
 
-    setisLoading("create");
-    setError("");
+    setIsLoadingAction("create");
     setSuccess("");
 
     try {
@@ -114,21 +105,22 @@ export default function ApiKeysPage() {
         setApiKeyValue(data?.apiKey);
         setNewKeyName("");
         setSuccess("API key created successfully!");
-        if (data?.apiKey?.keyValue)
+        if (data?.apiKey?.keyValue) {
           copyToClipboard(data?.apiKey?.keyValue, "", false);
-        fetchApiKeys();
+        }
+        await mutate(); 
       } else {
-        setError(data.error || "Failed to create API key");
+        throw new Error(data.error || "Failed to create API key");
       }
-    } catch {
-      setError("Failed to create API key");
+    } catch (err: any) {
+      toast(err.message || "Failed to create API key");
     } finally {
-      setisLoading("");
+      setIsLoadingAction("");
     }
   };
 
   useEffect(() => {
-    if (success || error) toast(success || error);
+    if (success || error) toast(success || error?.message);
   }, [success, error]);
 
   const getStatusIcon = () => {
@@ -179,7 +171,7 @@ export default function ApiKeysPage() {
                   <DialogTrigger asChild>
                     <Button disabled={apiKeys.length >= 5} size="sm">
                       <Plus className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
-                      <span className="hidden sm:inline ">Create API Key</span>
+                      <span className="hidden sm:inline">Create API Key</span>
                       <span className="sm:hidden">Create</span>
                     </Button>
                   </DialogTrigger>
@@ -243,10 +235,12 @@ export default function ApiKeysPage() {
                         <div className="flex gap-2 pt-4">
                           <Button
                             type="submit"
-                            disabled={isLoading == "create"}
+                            disabled={isLoadingAction === "create"}
                             className="flex-1 text-sm"
                           >
-                            {isLoading == "create" ? "Creating..." : "Add"}
+                            {isLoadingAction === "create"
+                              ? "Creating..."
+                              : "Add"}
                           </Button>
                           <Button
                             type="button"
@@ -355,9 +349,9 @@ export default function ApiKeysPage() {
                 ))
               ) : isLoading ? (
                 <div>
-                  <div className=" h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
-                  <div className=" h-12  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                  <div className=" h-12 dark:bg-muted/40 bg-gray-300  animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                  <div className="h-12 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -434,7 +428,7 @@ export default function ApiKeysPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="mt-4 pt-4 ">
+                    <div className="mt-4 pt-4">
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>
                           Created{" "}
@@ -452,9 +446,9 @@ export default function ApiKeysPage() {
               ))
             ) : isLoading ? (
               <div>
-                <div className=" h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
-                <div className=" h-24  dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
-                <div className=" h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                <div className="h-24 dark:bg-muted/40 bg-gray-300 animate-pulse"></div>
+                <div className="h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
+                <div className="h-24 dark:bg-muted/20 bg-gray-200 animate-pulse"></div>
               </div>
             ) : (
               <div className="text-center py-12">

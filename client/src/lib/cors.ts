@@ -7,6 +7,7 @@ export function setCorsHeaders(response: NextResponse) {
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, mailory-authorization"
   );
+  response.headers.set("Access-Control-Max-Age", "600");
   return response;
 }
 

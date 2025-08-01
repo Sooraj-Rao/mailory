@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ import { Check, Crown, Loader2 } from "lucide-react";
 import { useZustandStore } from "@/zustand/store";
 import { SUBSCRIPTION_PLANS } from "@/components/payment/subscription-modal";
 import { formatDistanceToNowStrict } from "date-fns";
+import { toast } from "sonner";
 
 declare global {
   interface Window {
@@ -30,17 +32,35 @@ interface UserSubscription {
   };
 }
 
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to fetch subscription");
+  }
+  return data.subscription;
+};
+
 export default function BillingPage() {
   const { userData } = useZustandStore();
-  const [subscription, setSubscription] = useState<UserSubscription | null>(
-    null
-  );
+  const {
+    data: subscription,
+    error,
+    mutate,
+    isLoading,
+  } = useSWR<UserSubscription | null, Error>("/api/payments", fetcher);
   const [loading, setLoading] = useState("");
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    fetchSubscription();
+    if (success) {
+      toast(success);
+    } else if (error) {
+      toast("Error occured");
+    }
+  }, [success, error]);
+
+  useEffect(() => {
     loadRazorpayScript();
   }, []);
 
@@ -51,23 +71,10 @@ export default function BillingPage() {
     document.body.appendChild(script);
   };
 
-  const fetchSubscription = async () => {
-    try {
-      const response = await fetch("/api/payments");
-      const data = await response.json();
-      if (response.ok) {
-        setSubscription(data.subscription);
-      }
-    } catch (err) {
-      console.error("Failed to fetch subscription:", err);
-    }
-  };
-
   const handleUpgrade = async (planId: string) => {
     if (!userData || planId === "free") return;
 
     setLoading(planId);
-    setError("");
 
     try {
       const response = await fetch("/api/payments/create-subscription", {
@@ -85,7 +92,7 @@ export default function BillingPage() {
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         subscription_id: data.subscriptionId,
-        name: "SendMailr",
+        name: "Mailory",
         description: `${SUBSCRIPTION_PLANS[planId].name} Plan Subscription`,
         handler: async (response: any) => {
           try {
@@ -104,12 +111,12 @@ export default function BillingPage() {
 
             if (verifyResponse.ok) {
               setSuccess("Subscription activated successfully!");
-              fetchSubscription();
+              await mutate()
             } else {
-              setError(verifyData.error);
+              toast(verifyData.error);
             }
           } catch {
-            setError("Payment verification failed");
+            toast("Payment verification failed");
           }
         },
         prefill: {
@@ -124,7 +131,7 @@ export default function BillingPage() {
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (err: any) {
-      setError(err.message);
+      toast(err.message);
     } finally {
       setLoading("");
     }
@@ -134,13 +141,21 @@ export default function BillingPage() {
     return Math.min((used / limit) * 100, 100);
   };
 
-  if (!subscription) {
+  if (!subscription && isLoading) {
     return (
       <div className="min-h-screen gap-x-2 app-gradient flex items-center justify-center p-4">
         <p>
-          <Loader2 className=" animate-spin" />
+          <Loader2 className="animate-spin" />
         </p>
-        <div className="text-foreground">Feteching Subscription info..</div>
+        <div className="text-foreground">Fetching Subscription info...</div>
+      </div>
+    );
+  }
+
+  if (!subscription) {
+    return (
+      <div className="min-h-screen gap-x-2 app-gradient flex items-center justify-center p-4">
+        <div className="text-foreground">No subscription data available</div>
       </div>
     );
   }
@@ -148,10 +163,10 @@ export default function BillingPage() {
   const currentPlan = SUBSCRIPTION_PLANS[subscription.plan];
 
   return (
-    <div className="min-h-screen py-4  sm:p-6 lg:pt-10 flex justify-center">
+    <div className="min-h-screen py-4 sm:p-6 lg:pt-10 flex justify-center">
       <div className="w-full max-w-7xl">
         <div>
-          <div className=" bg-background/80 backdrop-blur-sm">
+          <div className="bg-background/80 backdrop-blur-sm">
             <div className="flex h-14 sm:h-16 items-center px-4 sm:px-6">
               <div className="flex items-center gap-3 ml-4">
                 <div>
@@ -164,11 +179,6 @@ export default function BillingPage() {
           </div>
 
           <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
-            {error && (
-              <Alert className="border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
-                <AlertDescription className="text-sm">{error}</AlertDescription>
-              </Alert>
-            )}
             {success && (
               <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
                 <AlertDescription className="text-sm">
@@ -193,7 +203,7 @@ export default function BillingPage() {
                       </div>
                     </div>
                     <Badge
-                      className=" w-fit"
+                      className="w-fit"
                       variant={
                         subscription.status === "active" ? "green" : "gray"
                       }
@@ -376,7 +386,7 @@ export default function BillingPage() {
                                 </span>
                               </div>
                             )}
-                            {plan.dailyLimit  && (
+                            {plan.dailyLimit && (
                               <div className="flex items-center justify-between text-muted-foreground">
                                 <span>Daily</span>
                                 <span className="font-medium text-foreground">

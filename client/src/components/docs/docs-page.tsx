@@ -93,9 +93,7 @@ export default function DocsPage() {
                     </Button>
                   </Link>
                   <Link href="/register">
-                    <Button  size="sm">
-                      Get Started
-                    </Button>
+                    <Button size="sm">Get Started</Button>
                   </Link>
                 </div>
               )}
@@ -175,7 +173,7 @@ export default function DocsPage() {
                         </p>
                       </div>
                       <Link href="/dashboard/api-keys">
-                        <Button  size="sm">
+                        <Button size="sm">
                           Create API Key
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
@@ -219,8 +217,8 @@ export default function DocsPage() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm sm:text-base text-muted-foreground">
-                      Include your API key in the mailory-authorization header of every
-                      request:
+                      Include your API key in the mailory-authorization header
+                      of every request:
                     </p>
 
                     <CodeBlock
@@ -311,17 +309,25 @@ export default function DocsPage() {
                         <div className="text-sm">Email subject line</div>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg border">
-                        <div>
-                          <code className="text-sm font-medium">from</code>
-                          <Badge variant="destructive" className="ml-2 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg border text-sm">
+                        <div className="flex items-center space-x-2">
+                          <code className="font-medium">from</code>
+                          <Badge variant="destructive" className="text-xs">
                             required
                           </Badge>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          string
+                        <div className="text-muted-foreground">string</div>
+                        <div>Sender name or Your App name</div>
+
+                        <div className="sm:col-span-3 text-muted-foreground mt-2">
+                          <code className="font-medium text-foreground">
+                            Format:
+                          </code>
+                          <code className="bg-muted px-2 py-1 rounded">
+                            <span className=" font-semibold mr-1">NAME</span>
+                            &lt;email@mailory.site&gt;
+                          </code>
                         </div>
-                        <div className="text-sm">Sender name</div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg border">
@@ -398,7 +404,7 @@ export default function DocsPage() {
     "subject": "Welcome to our service!",
     "html": "<h1>Welcome!</h1><p>Thanks for signing up.</p>",
     "text": "Welcome! Thanks for signing up.",
-    "from": "MyApp"
+    "from": "MyApp <email@mailory.site>"
   }'`}
                           language="bash"
                           shouldCopy={true}
@@ -422,7 +428,7 @@ export default function DocsPage() {
     subject: 'Welcome to our service!',
     html: '<h1>Welcome!</h1><p>Thanks for signing up.</p>',
     text: 'Welcome! Thanks for signing up.',
-    from: 'MyApp'
+    from: 'MyApp <email@mailory.site>'
   })
 });
 
@@ -453,7 +459,7 @@ data = {
     "subject": "Welcome to our service!",
     "html": "<h1>Welcome!</h1><p>Thanks for signing up.</p>",
     "text": "Welcome! Thanks for signing up.",
-    "from": "MyApp"
+    "from": "MyApp <email@mailory.site>"
 }
 
 response = requests.post(url, json=data, headers=headers)
@@ -477,7 +483,7 @@ $data = [
     'subject' => 'Welcome to our service!',
     'html' => '<h1>Welcome!</h1><p>Thanks for signing up.</p>',
     'text' => 'Welcome! Thanks for signing up.',
-    'from' => 'MyApp'
+    'from' => 'MyApp <email@mailory.site>'
 ];
 
 $options = [
@@ -692,7 +698,7 @@ echo $response;
     "subject": "Monthly Newsletter",
     "html": "<h1>Newsletter</h1><p>Check out our latest updates!</p>",
     "text": "Newsletter: Check out our latest updates!",
-    "from": "MyCompany"
+    "from": "MyApp <email@mailory.site>"
   }'`}
                           language="bash"
                           shouldCopy={true}
@@ -755,7 +761,7 @@ data = {
     "subject": "Monthly Newsletter",
     "html": "<h1>Newsletter</h1><p>Check out our latest updates!</p>",
     "text": "Newsletter: Check out our latest updates!",
-    "from": "MyCompany"
+    "from": "MyApp <email@mailory.site>"
 }
 
 response = requests.post(url, json=data, headers=headers)
@@ -863,8 +869,9 @@ echo $response;
                         <div>
                           <h4 className="font-medium mb-1">Reset Schedule</h4>
                           <p className="text-sm text-muted-foreground">
-                            Rate limits reset daily at midnight UTC. Your quota
-                            is fully restored every 24 hours.
+                            Your daily email quota resets 24 hours after the
+                            first email you send that day. Limits are tracked on
+                            a rolling 24-hour basis and update dynamically.
                           </p>
                         </div>
                       </div>
@@ -901,7 +908,7 @@ Content-Type: application/json
 
 {
   "error": "Rate limit exceeded",
-  "message": "You have sent 100/100 emails today. Limit resets at midnight UTC."
+  "message": "You have sent 100/100 emails today."
 }`}
                       language="HTTP Response"
                     />
@@ -1029,7 +1036,7 @@ Content-Type: application/json
                       <CodeBlock
                         code={`{
   "error": "Rate limit exceeded",
-  "message": "You have sent 100/100 emails today. Limit resets at midnight UTC."
+  "message": "You have sent 100/100 emails today. Limit resets at next 24 hours of your first email."
 }`}
                         language="json"
                       />
