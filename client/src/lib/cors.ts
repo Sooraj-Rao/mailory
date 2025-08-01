@@ -5,7 +5,7 @@ export function setCorsHeaders(response: NextResponse) {
   response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   response.headers.set(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization"
+    "Content-Type, Authorization, mailory-authorization"
   );
   return response;
 }
