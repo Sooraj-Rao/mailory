@@ -45,7 +45,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
   pro: {
     id: "pro",
     name: "Pro",
-    price: 499,
+    price: 599,
     currency: "INR",
     dailyLimit: 600,
     monthlyLimit: 18000,
@@ -70,7 +70,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
   premium: {
     id: "premium",
     name: "Premium",
-    price: 999,
+    price: 1199,
     currency: "INR",
     dailyLimit: 1334,
     monthlyLimit: 40000,
