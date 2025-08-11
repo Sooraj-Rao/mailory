@@ -126,7 +126,7 @@ export default function Pricing() {
                 </ul>
 
                 <Link
-                  href={plan.name === "Enterprise" ? "#contact" : "/register"}
+                  href={plan.name === "Enterprise" ? "#contact" : "/login"}
                 >
                   <Button
                     className={`w-full ${

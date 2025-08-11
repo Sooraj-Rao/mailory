@@ -274,7 +274,7 @@ export default function LandingPage() {
                   Documentation
                 </Button>
               </Link>
-              <Link href="/register">
+              <Link href="/login">
                 <Button size="lg">
                   <span className="relative z-10">Get Started</span>
                 </Button>
@@ -331,7 +331,7 @@ export default function LandingPage() {
               variants={staggerItem}
               transition={{ delay: 0.8 }}
             >
-              <Link href="/register">
+              <Link href="/login">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -847,7 +847,7 @@ export default function LandingPage() {
                     </motion.li>
                   ))}
                 </motion.ul>
-                <Link href={"/register"}>
+                <Link href={"/login"}>
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -918,7 +918,7 @@ export default function LandingPage() {
             variants={staggerItem}
             transition={{ delay: 0.4 }}
           >
-            <Link href="/register">
+            <Link href="/login">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -1038,7 +1038,7 @@ export default function LandingPage() {
                 {
                   title: "Application",
                   links: [
-                    { name: "Features", href: "/#features" },
+                    { name: "Features", href: "#features" },
                     { name: "Demo", href: "/login" },
                   ],
                 },

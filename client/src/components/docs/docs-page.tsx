@@ -92,7 +92,7 @@ export default function DocsPage() {
                       Sign In
                     </Button>
                   </Link>
-                  <Link href="/register">
+                  <Link href="/login">
                     <Button size="sm">Get Started</Button>
                   </Link>
                 </div>

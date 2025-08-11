@@ -57,7 +57,7 @@ export default function Header() {
                 Sign In
               </Button>
             </Link>
-            <Link href="/register">
+            <Link href="/login">
               <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0">
                 Get Started
               </Button>
@@ -118,7 +118,7 @@ export default function Header() {
                     Sign In
                   </Button>
                 </Link>
-                <Link href="/register">
+                <Link href="/login">
                   <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0">
                     Get Started
                   </Button>
