@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/home/sidebar";
-import TestCredentials from "../testdata/page";
+import TestCredentials from "@/components/home/test-auth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
