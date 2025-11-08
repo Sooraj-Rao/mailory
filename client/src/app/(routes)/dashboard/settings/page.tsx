@@ -634,8 +634,11 @@ export default function SettingsPage() {
                       variant="destructive"
                       className="w-full sm:w-auto text-sm"
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      <span className=" mt-[2px]">
                       Delete Account
+
+                      </span>
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent className="mx-4 max-w-md">

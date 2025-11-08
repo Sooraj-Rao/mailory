@@ -205,7 +205,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div className=" hidden inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-600/30 to-pink-600/30 rounded-full blur-3xl"
           animate={{
@@ -1000,12 +1000,12 @@ export default function LandingPage() {
 
           {isHovering && (
             <motion.div
-              className="fixed pointer-events-none z-50"
+              className="  hidden  pointer-events-none z-50"
               style={{
                 left: mousePosition.x - 10,
                 top: mousePosition.y - 10,
-                width: 20,
-                height: 20,
+                width: 10,
+                height: 10,
                 background:
                   "radial-gradient(circle, rgba(59, 130, 246, 0.8) 0%, rgba(34, 197, 94, 0.6) 50%, transparent 100%)",
                 borderRadius: "50%",
